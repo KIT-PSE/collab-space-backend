@@ -12,12 +12,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: [process.env.FRONTEND_URL],
     credentials: true,
   });
 
   app.setGlobalPrefix('api/v1');
-  app.use(cookieParser('secret'));
+  app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
   app.useGlobalPipes(new ValidationPipe({ exceptionFactory }));
 
   // allows us to use NestJS DI in class-validator custom decorators

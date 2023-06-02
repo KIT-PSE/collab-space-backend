@@ -1,11 +1,11 @@
 import { defineConfig } from '@mikro-orm/mysql';
 
 export default defineConfig({
-  host: '127.0.0.1',
-  port: 3306,
-  user: 'root',
-  password: '12345',
-  dbName: 'collab_space',
+  host: process.env.DB_HOST,
+  port: +process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  dbName: process.env.DB_NAME,
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
 });
