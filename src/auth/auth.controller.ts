@@ -5,38 +5,51 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { Response } from 'express';
+import { RegisterUser, LoginUser } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('login')
-  public async login(
-    @Body() data,
+  @Post('register')
+  public async register(
+    @Body() data: RegisterUser,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { token, user, exp } = await this.authService.login(
-      data.email,
-      data.password,
-    );
+    const payload = await this.authService.register(data);
 
-    response.cookie('jwt', token, { httpOnly: true });
+    response.cookie('jwt', payload.token, { httpOnly: true });
 
-    return { user: { ...user, exp } };
+    return payload;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  public async login(
+    @Body() data: LoginUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const payload = await this.authService.login(data);
+
+    response.cookie('jwt', payload.token, { httpOnly: true });
+
+    return payload;
   }
 
   @UseGuards(AuthGuard)
   @Get('profile')
-  public profile(@Request() request) {
-    return { user: request.user };
+  public async profile() {
+    const user = await this.authService.user();
+    const token = this.authService.token();
+
+    return { user, exp: token.exp };
   }
 
   @UseGuards(AuthGuard)

@@ -11,7 +11,11 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.register({
       global: true,
       secret: 'secret',
-      signOptions: { expiresIn: '10s' },
+      signOptions: { expiresIn: '1h' },
+      verifyOptions: {
+        ignoreExpiration: false,
+        audience: 'collab-space.com',
+      },
     }),
   ],
   controllers: [AuthController],
