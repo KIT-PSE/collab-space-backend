@@ -1,4 +1,5 @@
 import { defineConfig } from '@mikro-orm/mysql';
+import * as process from 'process';
 
 export default defineConfig({
   host: process.env.DB_HOST,
@@ -8,4 +9,12 @@ export default defineConfig({
   dbName: process.env.DB_NAME,
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
+  migrations: {
+    path: 'dist/database/migrations',
+    pathTs: 'database/migrations',
+  },
+  seeder: {
+    path: 'dist/database/seeders',
+    pathTs: 'database/seeders',
+  },
 });
