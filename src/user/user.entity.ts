@@ -1,6 +1,13 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { Category } from '../category/category.entity';
 
-@Entity()
+@Entity({ tableName: 'users' })
 export class User {
   @PrimaryKey()
   id!: number;
@@ -14,14 +21,17 @@ export class User {
   @Property()
   organization!: string;
 
-  @Property()
+  @Property({ hidden: true })
   password!: string;
 
+  @OneToMany(() => Category, (category) => category.owner, { hidden: true })
+  categories = new Collection<Category>(this);
+
   @Property()
-  createdAt: Date = new Date();
+  createdAt = new Date();
 
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  updatedAt = new Date();
 
   constructor(
     name: string,

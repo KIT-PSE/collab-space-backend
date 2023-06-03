@@ -15,7 +15,7 @@ import { RegisterUser, LoginUser } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly auth: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('register')
@@ -23,7 +23,7 @@ export class AuthController {
     @Body() data: RegisterUser,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const payload = await this.authService.register(data);
+    const payload = await this.auth.register(data);
 
     response.cookie('jwt', payload.token, { httpOnly: true });
 
@@ -36,7 +36,7 @@ export class AuthController {
     @Body() data: LoginUser,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const payload = await this.authService.login(data);
+    const payload = await this.auth.login(data);
 
     response.cookie('jwt', payload.token, { httpOnly: true });
 
@@ -46,8 +46,8 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   public async profile() {
-    const user = await this.authService.user();
-    const token = this.authService.token();
+    const user = await this.auth.user();
+    const token = this.auth.token();
 
     return { user, exp: token.exp };
   }

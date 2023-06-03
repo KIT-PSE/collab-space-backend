@@ -10,13 +10,13 @@ import { JwtToken } from './jwt.strategy';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly users: UserService,
     private readonly jwtService: JwtService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   public async login({ email, password }: LoginUser): Promise<AuthPayload> {
-    const user = await this.userService.findByEmail(email);
+    const user = await this.users.findByEmail(email);
 
     // TODO: password hashing and salting
     if (user?.password !== password) {
@@ -29,7 +29,7 @@ export class AuthService {
   public async register(data: CreateUser): Promise<AuthPayload> {
     // TODO: email verification
 
-    const user = await this.userService.create(data);
+    const user = await this.users.create(data);
 
     return this.createToken(user);
   }
@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   public async user(): Promise<User> {
-    return await this.userService.findOne(this.token().sub);
+    return await this.users.findOne(this.token().sub);
   }
 
   public token(): JwtToken {

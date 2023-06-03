@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { IsUniqueConstraint } from './common/constraints/unique';
 import { ConfigModule } from '@nestjs/config';
+import { CategoryModule } from './category/category.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot(),
     AuthModule,
     UserModule,
+    CategoryModule,
+    RoomModule,
   ],
   providers: [AppService, IsUniqueConstraint],
 })

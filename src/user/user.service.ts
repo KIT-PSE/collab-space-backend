@@ -9,7 +9,8 @@ import { CreateUser } from '../auth/auth.dto';
 export class UserService {
   constructor(
     private readonly em: EntityManager,
-    @InjectRepository(User) private readonly repository: EntityRepository<User>,
+    @InjectRepository(User)
+    private readonly repository: EntityRepository<User>,
   ) {}
 
   public async findOne(id: number): Promise<User | null> {
