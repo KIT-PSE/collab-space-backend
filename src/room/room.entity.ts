@@ -1,4 +1,9 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { Category } from '../category/category.entity';
 
 @Entity({ tableName: 'rooms' })
@@ -12,7 +17,7 @@ export class Room {
   @Property({ hidden: true })
   password?: string;
 
-  @ManyToOne()
+  @ManyToOne({ onDelete: 'cascade' })
   category: Category;
 
   @Property()

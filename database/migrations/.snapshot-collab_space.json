@@ -263,6 +263,7 @@
             "id"
           ],
           "referencedTableName": "categories",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       }

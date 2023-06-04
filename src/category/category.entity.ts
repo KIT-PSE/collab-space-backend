@@ -20,7 +20,7 @@ export class Category {
   @ManyToOne({ hidden: true })
   owner: User;
 
-  @OneToMany(() => Room, (room) => room.category, { hidden: true })
+  @OneToMany(() => Room, (room) => room.category)
   rooms = new Collection<Room>(this);
 
   @Property()
