@@ -67,6 +67,16 @@
           "nullable": false,
           "length": 0,
           "mappedType": "datetime"
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'user'",
+          "mappedType": "string"
         }
       },
       "name": "users",
