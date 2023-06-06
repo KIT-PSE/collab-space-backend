@@ -11,6 +11,7 @@ export class DatabaseSeeder extends Seeder {
       name: 'Test User',
       organization: 'Test Organization',
       password: '12345',
+      role: 'admin',
     });
 
     const categories = ['Mathe', 'Deutsch', 'Physik', 'Religion'];
