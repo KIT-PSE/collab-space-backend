@@ -33,7 +33,7 @@ export class User {
   @Property({ onUpdate: () => new Date() })
   updatedAt = new Date();
 
-  @Property({ hidden: true })
+  @Property()
   role: 'user' | 'admin' = 'user';
 
   constructor(
