@@ -4,6 +4,8 @@ import { EntityRepository } from '@mikro-orm/mysql';
 import { User } from './user.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CreateUser } from '../auth/auth.dto';
+import * as bcrypt from 'bcrypt';
+import { saltOrRounds } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -22,11 +24,13 @@ export class UserService {
   }
 
   public async create(data: CreateUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds);
+
     const user = new User(
       data.name,
       data.email,
       data.organization,
-      data.password,
+      hashedPassword,
     );
 
     await this.em.persistAndFlush(user);
