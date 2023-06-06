@@ -33,4 +33,7 @@ export class UserService {
 
     return user;
   }
+  public async delete(id: number): Promise<void> {
+    await this.repository.nativeDelete({ id });
+  }
 }

@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Delete,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -55,6 +56,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('logout')
   public async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt');
+
+    return { message: 'success' };
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('delete')
+  public async delete(@Res({ passthrough: true }) response: Response) {
+    const user = await this.auth.user();
+    const id = user.id;
+
+    await this.auth.delete(id);
     response.clearCookie('jwt');
 
     return { message: 'success' };
