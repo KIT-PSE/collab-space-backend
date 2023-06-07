@@ -21,6 +21,10 @@ export class UserService {
     return this.repository.findOne({ email });
   }
 
+  public async findAll(): Promise<User[]> {
+    return this.repository.findAll();
+  }
+
   public async create(data: CreateUser): Promise<User> {
     const user = new User(
       data.name,
