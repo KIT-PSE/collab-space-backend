@@ -3,14 +3,18 @@ import { Seeder } from '@mikro-orm/seeder';
 import { User } from '../../src/user/user.entity';
 import { Category } from '../../src/category/category.entity';
 import { Room } from '../../src/room/room.entity';
+import * as bcrypt from 'bcrypt';
+import { UserService } from '../../src/user/user.service';
 
 export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
+    const password = await bcrypt.hash('12345', UserService.SALT_OR_ROUNDS);
+
     em.create(User, {
       email: 'test@example.com',
       name: 'Test User',
       organization: 'Test Organization',
-      password: '12345',
+      password,
       role: 'admin',
     });
 
