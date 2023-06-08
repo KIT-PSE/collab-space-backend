@@ -12,7 +12,7 @@ export class Room {
   @Property({ hidden: true })
   password?: string;
 
-  @ManyToOne()
+  @ManyToOne({ onDelete: 'cascade' })
   category: Category;
 
   @Property()

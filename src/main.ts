@@ -7,6 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { useContainer } from 'class-validator';
+import { NotFoundInterceptor } from './common/not-found.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
   app.useGlobalPipes(new ValidationPipe({ exceptionFactory }));
+  app.useGlobalInterceptors(new NotFoundInterceptor());
 
   // allows us to use NestJS DI in class-validator custom decorators
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
