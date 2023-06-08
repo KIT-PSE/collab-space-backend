@@ -4,17 +4,17 @@ import { User } from '../../src/user/user.entity';
 import { Category } from '../../src/category/category.entity';
 import { Room } from '../../src/room/room.entity';
 import * as bcrypt from 'bcrypt';
-import { saltOrRounds } from '../../src/auth/auth.service';
+import { UserService } from '../../src/user/user.service';
 
 export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
-    const hashedPassword = await bcrypt.hash('12345', saltOrRounds);
+    const password = await bcrypt.hash('12345', UserService.SALT_OR_ROUNDS);
 
     em.create(User, {
       email: 'test@example.com',
       name: 'Test User',
       organization: 'Test Organization',
-      password: hashedPassword,
+      password,
       role: 'admin',
     });
 

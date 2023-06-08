@@ -8,8 +8,6 @@ import { REQUEST } from '@nestjs/core';
 import { JwtToken } from './jwt.strategy';
 import * as bcrypt from 'bcrypt';
 
-export const saltOrRounds = 9;
-
 @Injectable()
 export class AuthService {
   constructor(
