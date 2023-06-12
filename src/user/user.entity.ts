@@ -47,4 +47,8 @@ export class User {
     this.organization = organization;
     this.password = password;
   }
+
+  public toString(): string {
+    return `User{${this.id}: "${this.name}"}`;
+  }
 }

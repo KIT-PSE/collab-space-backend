@@ -17,6 +17,10 @@ export class RoomService {
     return this.repository.findOneOrFail({ id, category });
   }
 
+  public async findOneWithCategory(id: number): Promise<Room | null> {
+    return this.repository.findOne({ id }, { populate: ['category'] });
+  }
+
   public async create(
     name: string,
     category: Category,

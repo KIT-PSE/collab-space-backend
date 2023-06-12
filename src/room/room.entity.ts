@@ -26,4 +26,8 @@ export class Room {
     this.category = category;
     this.password = password;
   }
+
+  public toString(): string {
+    return `Room{${this.id}: "${this.name}"}`;
+  }
 }
