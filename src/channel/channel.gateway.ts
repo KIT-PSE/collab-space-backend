@@ -105,22 +105,23 @@ export class ChannelGateway implements OnGatewayConnection {
     };
   }
 
-  public async handleConnection(client: Socket) {
-    /*
-     * This is a workaround for getting the client's rooms in the disconnecting event.
-     * The client's rooms are not available in the disconnecting event when
-     * using nest.js' @SubscribeMessage('disconnecting') decorator.
-     */
-    client.on('disconnecting', () => this.disconnecting(client));
-  }
-
+  @SubscribeMessage('leave-room')
   @UseRequestContext()
-  public async disconnecting(@ConnectedSocket() client: Socket) {
+  public async leaveRoom(@ConnectedSocket() client: Socket) {
     for (const room of client.rooms) {
       if (room !== client.id) {
         client.leave(room);
         await this.channels.leave(client, room);
       }
     }
+  }
+
+  public async handleConnection(client: Socket) {
+    /*
+     * This is a workaround for getting the client's rooms in the disconnecting event.
+     * The client's rooms are not available in the disconnecting event when
+     * using nest.js' @SubscribeMessage('disconnecting') decorator.
+     */
+    client.on('disconnecting', () => this.leaveRoom(client));
   }
 }

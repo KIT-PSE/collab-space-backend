@@ -93,14 +93,15 @@ export class ChannelService {
     if (channel?.teacher?.client.id === client.id) {
       await channel?.leaveAsTeacher(client);
       this.logger.debug(`Left ${channel} as teacher ${client.id}`);
-      return;
+    } else {
+      await channel?.leaveAsStudent(client);
+      this.logger.debug(`Left ${channel} as student ${client.id}`);
     }
 
-    await channel?.leaveAsStudent(client);
-    this.logger.debug(`Left ${channel} as student ${client.id}`);
-
     if (channel?.isEmpty()) {
+      channel.close();
       delete this.channels[channelId];
+      this.logger.debug(`Closed ${channel}`);
     }
   }
 }

@@ -77,6 +77,10 @@ export class Channel {
     return !this.teacher && this.students.length === 0;
   }
 
+  public close() {
+    this.server.emit('room-closed', this.room.id);
+  }
+
   public toString(): string {
     return `Channel{${this.id}}`;
   }
