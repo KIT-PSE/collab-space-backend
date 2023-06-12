@@ -24,6 +24,10 @@ export class UserService {
     return this.repository.findOne({ email });
   }
 
+  public async findAll(): Promise<User[]> {
+    return this.repository.findAll();
+  }
+
   public async find(ids: number[]): Promise<User[]> {
     return this.repository.find(ids);
   }
@@ -40,6 +44,7 @@ export class UserService {
 
     return user;
   }
+
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
   }
