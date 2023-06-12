@@ -17,7 +17,7 @@ export class Category {
   @Property()
   name: string;
 
-  @ManyToOne({ hidden: true })
+  @ManyToOne({ hidden: true, onDelete: 'cascade' })
   owner: User;
 
   @OneToMany(() => Room, (room) => room.category)

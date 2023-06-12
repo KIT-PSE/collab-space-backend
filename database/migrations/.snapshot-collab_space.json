@@ -177,6 +177,7 @@
             "id"
           ],
           "referencedTableName": "users",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       }
