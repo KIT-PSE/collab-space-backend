@@ -81,6 +81,19 @@ export class Channel {
     this.server.emit('room-closed', this.room.id);
   }
 
+  public changeName(client: Socket, name: string) {
+    const student = this.students.find((s) => s.id === client.id);
+
+    if (student) {
+      student.name = name;
+    }
+
+    this.server.to(this.id).emit('change-name', {
+      id: client.id,
+      name,
+    });
+  }
+
   public toString(): string {
     return `Channel{${this.id}}`;
   }

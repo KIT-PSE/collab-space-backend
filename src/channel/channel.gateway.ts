@@ -116,6 +116,16 @@ export class ChannelGateway implements OnGatewayConnection {
     }
   }
 
+  @SubscribeMessage('change-name')
+  @UseRequestContext()
+  public async changeName(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { name: string },
+  ) {
+    await this.channels.changeName(client, payload.name);
+    return true;
+  }
+
   public async handleConnection(client: Socket) {
     /*
      * This is a workaround for getting the client's rooms in the disconnecting event.

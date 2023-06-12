@@ -104,4 +104,24 @@ export class ChannelService {
       this.logger.debug(`Closed ${channel}`);
     }
   }
+
+  public fromClient(client: Socket): Channel | null {
+    for (const room of client.rooms) {
+      if (this.channels[room]) {
+        return this.channels[room];
+      }
+    }
+
+    return null;
+  }
+
+  public async changeName(client: Socket, name: string) {
+    const channel = this.fromClient(client);
+
+    if (!channel) {
+      throw new WsException('Channel not found');
+    }
+
+    await channel.changeName(client, name);
+  }
 }
