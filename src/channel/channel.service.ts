@@ -124,4 +124,17 @@ export class ChannelService {
 
     await channel.changeName(client, name);
   }
+
+  public async getOtherClient(
+    client: Socket,
+    otherId: string,
+  ): Promise<Socket> {
+    const channel = this.fromClient(client);
+
+    if (!channel) {
+      throw new WsException('Channel not found');
+    }
+
+    return channel.getUser(otherId).client;
+  }
 }

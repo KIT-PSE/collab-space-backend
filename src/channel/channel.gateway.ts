@@ -126,6 +126,25 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  @SubscribeMessage('connect-webcam')
+  @UseRequestContext()
+  public async addWebcam(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { userId: string; peerId: string },
+  ) {
+    const otherClient = await this.channels.getOtherClient(
+      client,
+      payload.userId,
+    );
+
+    otherClient.emit('connect-webcam', {
+      userId: client.id,
+      peerId: payload.peerId,
+    });
+
+    return true;
+  }
+
   public async handleConnection(client: Socket) {
     /*
      * This is a workaround for getting the client's rooms in the disconnecting event.

@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
+import { WsException } from '@nestjs/websockets';
 
 export interface Teacher {
   user: User;
@@ -79,6 +80,20 @@ export class Channel {
 
   public close() {
     this.server.emit('room-closed', this.room.id);
+  }
+
+  public getUser(clientId: string): Teacher | Student {
+    if (this.teacher && this.teacher.client.id === clientId) {
+      return this.teacher;
+    }
+
+    const student = this.students.find((s) => s.client.id === clientId);
+
+    if (student) {
+      return student;
+    }
+
+    throw new WsException(`User not found in ${this}`);
   }
 
   public changeName(client: Socket, name: string) {
