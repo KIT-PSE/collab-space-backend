@@ -88,15 +88,18 @@ export class ChannelGateway implements OnGatewayConnection {
   }
 
   private channelState(channel: Channel) {
-    const room = channel.room;
-    const teacher = channel.teacher.user;
+    const teacher = {
+      id: channel.teacher.client.id,
+      user: channel.teacher.user,
+    };
+
     const students = channel.students.map((student) => ({
       id: student.id,
       name: student.name,
     }));
 
     return {
-      room,
+      room: channel.room,
       teacher,
       students,
     };

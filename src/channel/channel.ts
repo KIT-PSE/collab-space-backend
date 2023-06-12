@@ -48,7 +48,9 @@ export class Channel {
     await client.join(this.id);
     this.teacher = { user, client };
 
-    client.broadcast.to(this.id).emit('teacher-joined', user);
+    client.broadcast
+      .to(this.id)
+      .emit('teacher-joined', { id: client.id, user });
   }
 
   public async leaveAsTeacher(client: Socket) {
