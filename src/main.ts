@@ -12,10 +12,12 @@ import { NotFoundInterceptor } from './common/not-found.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: [process.env.FRONTEND_URL],
-    credentials: true,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    app.enableCors({
+      origin: [process.env.FRONTEND_URL],
+      credentials: true,
+    });
+  }
 
   app.setGlobalPrefix('api/v1');
   app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
@@ -25,7 +27,7 @@ async function bootstrap() {
   // allows us to use NestJS DI in class-validator custom decorators
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 
 bootstrap();
