@@ -99,10 +99,21 @@ export class ChannelService {
       this.logger.debug(`Left ${channel} as student ${client.id}`);
     }
 
+    /*
+     * If the channel is empty after the client left, close it after 1 second.
+     * This is a temporary solution to prevent the channel from being
+     * closed when the teacher leaves and rejoins.
+     *
+     * TODO: implement a better solution
+     */
     if (channel?.isEmpty()) {
-      channel.close();
-      delete this.channels[channelId];
-      this.logger.debug(`Closed ${channel}`);
+      setTimeout(() => {
+        if (channel?.isEmpty()) {
+          channel.close();
+          delete this.channels[channelId];
+          this.logger.debug(`Closed ${channel}`);
+        }
+      }, 1000);
     }
   }
 

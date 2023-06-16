@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel';
 import * as process from 'process';
+import { BrowserService } from '../browser/browser.service';
 
 const WEB_SOCKET_OPTIONS =
   process.env.NODE_ENV === 'production'
@@ -22,7 +23,11 @@ export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
   public server: Server;
 
-  constructor(private orm: MikroORM, private channels: ChannelService) {}
+  constructor(
+    private orm: MikroORM,
+    private channels: ChannelService,
+    private browserService: BrowserService,
+  ) {}
 
   // todo: add authentication - only a logged in teacher should be able to open a room
   @SubscribeMessage('open-room')
@@ -172,6 +177,20 @@ export class ChannelGateway implements OnGatewayConnection {
       video: payload.video,
       audio: payload.audio,
     });
+
+    return true;
+  }
+
+  @SubscribeMessage('open-website')
+  @UseRequestContext()
+  public async openWebsite(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { url: string },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    // await channel.openWebsite(payload.url);
+    const peerId = await this.browserService.openBrowser(payload.url);
+    this.server.to(channel.id).emit('open-website', peerId);
 
     return true;
   }
