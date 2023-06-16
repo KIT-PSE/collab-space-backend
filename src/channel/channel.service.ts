@@ -33,7 +33,8 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
-    const channel = new Channel(room, user, client, server);
+    const channel = new Channel(room, server);
+    await channel.joinAsTeacher(client, user);
     this.channels[channel.id] = channel;
 
     this.logger.debug(`Opened ${channel} for ${room} with ${user}`);
@@ -47,8 +48,8 @@ export class ChannelService {
 
   public async joinAsStudent(
     client: Socket,
-    name: string,
     channelId: string,
+    name: string,
   ): Promise<Channel> {
     const channel = this.channels[channelId];
 
@@ -105,23 +106,22 @@ export class ChannelService {
     }
   }
 
-  public fromClient(client: Socket): Channel | null {
+  public fromClientOrFail(client: Socket): Channel {
     for (const room of client.rooms) {
       if (this.channels[room]) {
         return this.channels[room];
       }
     }
 
-    return null;
+    throw new WsException('Channel not found');
   }
 
-  public async changeName(client: Socket, name: string) {
-    const channel = this.fromClient(client);
+  public async getOtherClient(
+    client: Socket,
+    otherId: string,
+  ): Promise<Socket> {
+    const channel = this.fromClientOrFail(client);
 
-    if (!channel) {
-      throw new WsException('Channel not found');
-    }
-
-    await channel.changeName(client, name);
+    return channel.getUser(otherId).client;
   }
 }
