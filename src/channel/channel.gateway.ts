@@ -57,8 +57,8 @@ export class ChannelGateway implements OnGatewayConnection {
 
     const channel = await this.channels.joinAsStudent(
       client,
-      payload.name,
       payload.channelId,
+      payload.name,
     );
 
     return this.channelState(channel);
@@ -91,11 +91,15 @@ export class ChannelGateway implements OnGatewayConnection {
     const teacher = {
       id: channel.teacher.client.id,
       user: channel.teacher.user,
+      video: channel.teacher.video,
+      audio: channel.teacher.audio,
     };
 
     const students = channel.students.map((student) => ({
-      id: student.id,
+      id: student.client.id,
       name: student.name,
+      video: student.video,
+      audio: student.audio,
     }));
 
     return {
@@ -122,7 +126,14 @@ export class ChannelGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { name: string },
   ) {
-    await this.channels.changeName(client, payload.name);
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.changeName(client, payload.name);
+
+    this.server.to(channel.id).emit('change-name', {
+      id: client.id,
+      name: payload.name,
+    });
+
     return true;
   }
 
@@ -140,6 +151,24 @@ export class ChannelGateway implements OnGatewayConnection {
     otherClient.emit('connect-webcam', {
       userId: client.id,
       peerId: payload.peerId,
+    });
+
+    return true;
+  }
+
+  @SubscribeMessage('update-webcam')
+  @UseRequestContext()
+  public async updateWebcam(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { video: boolean; audio: boolean },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.updateWebcam(client, payload.video, payload.audio);
+
+    this.server.to(channel.id).emit('update-webcam', {
+      id: client.id,
+      video: payload.video,
+      audio: payload.audio,
     });
 
     return true;

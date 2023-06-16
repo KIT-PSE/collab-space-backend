@@ -4,15 +4,18 @@ import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
 import { WsException } from '@nestjs/websockets';
 
-export interface Teacher {
-  user: User;
+export interface ChannelUser {
   client: Socket;
+  video: boolean;
+  audio: boolean;
 }
 
-export interface Student {
-  id: string;
+export interface Teacher extends ChannelUser {
+  user: User;
+}
+
+export interface Student extends ChannelUser {
   name: string;
-  client: Socket;
 }
 
 export class Channel {
@@ -20,25 +23,21 @@ export class Channel {
   public teacher?: Teacher;
   public readonly students: Student[] = [];
 
-  constructor(
-    public readonly room: Room,
-    user: User,
-    client: Socket,
-    public readonly server: Server,
-  ) {
+  constructor(public readonly room: Room, public readonly server: Server) {
     // TODO: change id to be a 6 digit random number instead of a UUID to make it easier to type
     this.id = crypto.randomUUID();
-    this.teacher = { user, client };
-    client.join(this.id);
   }
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
-    this.students.push({ id: client.id, name, client });
+    this.students.push({ name, client, video: true, audio: true });
 
-    client.broadcast
-      .to(this.id)
-      .emit('student-joined', { id: client.id, name });
+    client.broadcast.to(this.id).emit('student-joined', {
+      id: client.id,
+      name,
+      video: true,
+      audio: true,
+    });
   }
 
   public async joinAsTeacher(client: Socket, user: User) {
@@ -47,11 +46,14 @@ export class Channel {
     }
 
     await client.join(this.id);
-    this.teacher = { user, client };
+    this.teacher = { user, client, video: true, audio: true };
 
-    client.broadcast
-      .to(this.id)
-      .emit('teacher-joined', { id: client.id, user });
+    client.broadcast.to(this.id).emit('teacher-joined', {
+      id: client.id,
+      user,
+      video: true,
+      audio: true,
+    });
   }
 
   public async leaveAsTeacher(client: Socket) {
@@ -63,7 +65,7 @@ export class Channel {
 
   public async leaveAsStudent(client: Socket) {
     await client.leave(this.id);
-    const index = this.students.findIndex((s) => s.id === client.id);
+    const index = this.students.findIndex((s) => s.client.id === client.id);
 
     if (index < 0) {
       return;
@@ -97,16 +99,20 @@ export class Channel {
   }
 
   public changeName(client: Socket, name: string) {
-    const student = this.students.find((s) => s.id === client.id);
+    const student = this.students.find((s) => s.client.id === client.id);
 
     if (student) {
       student.name = name;
     }
+  }
 
-    this.server.to(this.id).emit('change-name', {
-      id: client.id,
-      name,
-    });
+  public updateWebcam(client: Socket, video: boolean, audio: boolean) {
+    const user = this.getUser(client.id);
+
+    if (user) {
+      user.video = video;
+      user.audio = audio;
+    }
   }
 
   public toString(): string {
