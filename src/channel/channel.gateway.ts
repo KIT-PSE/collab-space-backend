@@ -11,6 +11,8 @@ import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel';
 import * as process from 'process';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from '../common/guards/websocket.guard';
 
 const WEB_SOCKET_OPTIONS =
   process.env.NODE_ENV === 'production'
@@ -25,6 +27,7 @@ export class ChannelGateway implements OnGatewayConnection {
   constructor(private orm: MikroORM, private channels: ChannelService) {}
 
   // todo: add authentication - only a logged in teacher should be able to open a room
+  @UseGuards(WsGuard)
   @SubscribeMessage('open-room')
   @UseRequestContext()
   public async openRoom(
