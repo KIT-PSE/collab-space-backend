@@ -167,6 +167,8 @@ export class ChannelGateway implements OnGatewayConnection {
     const channel = await this.channels.fromClientOrFail(client);
     channel.updateWebcam(client, payload.video, payload.audio);
 
+    // test
+
     this.server.to(channel.id).emit('update-webcam', {
       id: client.id,
       video: payload.video,
