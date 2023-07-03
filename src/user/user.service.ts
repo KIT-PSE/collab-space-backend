@@ -45,6 +45,13 @@ export class UserService {
     return user;
   }
 
+  public async updateRefreshToken(
+    id: number,
+    refreshToken: string,
+  ): Promise<void> {
+    await this.repository.nativeUpdate({ id }, { refreshToken });
+  }
+
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
   }

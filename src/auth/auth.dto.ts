@@ -60,8 +60,13 @@ export class LoginUser {
   password: string;
 }
 
-export interface AuthPayload {
-  token: string;
-  user: User;
+export interface JwtToken {
+  sub: number;
+  iat: number;
   exp: number;
+}
+
+export interface Tokens {
+  access_token: string;
+  refresh_token: string;
 }

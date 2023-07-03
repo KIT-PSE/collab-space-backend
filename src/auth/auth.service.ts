@@ -1,11 +1,15 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { LoginUser, CreateUser, AuthPayload } from './auth.dto';
+import { LoginUser, CreateUser, Tokens, JwtToken } from './auth.dto';
 import { User } from '../user/user.entity';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { JwtToken } from './jwt.strategy';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -16,34 +20,73 @@ export class AuthService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
-  public async login({ email, password }: LoginUser): Promise<AuthPayload> {
+  public async login({
+    email,
+    password,
+  }: LoginUser): Promise<Tokens & { user: User }> {
     const user = await this.users.findByEmail(email);
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.createToken(user);
+
+    const tokens = await this.createTokens(user);
+
+    return { ...tokens, user };
   }
 
-  public async register(data: CreateUser): Promise<AuthPayload> {
+  public async register(data: CreateUser): Promise<Tokens & { user: User }> {
     // TODO: email verification
 
     const user = await this.users.create(data);
+    const tokens = await this.createTokens(user);
 
-    return this.createToken(user);
+    return { ...tokens, user };
   }
 
   public async delete(id: number): Promise<void> {
     return await this.users.delete(id);
   }
 
-  private createToken(user: User): AuthPayload {
-    const payload = { sub: user.id };
-    const token = this.jwtService.sign(payload);
-    const exp = this.jwtService.decode(token)['exp'];
+  private async createTokens(user: User): Promise<Tokens> {
+    const access_token = this.createAccessToken(user);
+    const refresh_token = await this.createRefreshToken(user);
 
-    return { token, user, exp };
+    return { access_token, refresh_token };
+  }
+
+  private createAccessToken(user: User): string {
+    const payload = { sub: user.id };
+    return this.jwtService.sign(payload, { expiresIn: '1m' });
+  }
+
+  private async createRefreshToken(user: User): Promise<string> {
+    const payload = { sub: user.id };
+
+    // Save the refresh token in the database
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    await this.users.updateRefreshToken(user.id, refreshToken);
+
+    return refreshToken;
+  }
+
+  public async refreshAccessToken(refreshToken: string): Promise<string> {
+    const user = await this.user();
+
+    if (!user || !refreshToken) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return this.createAccessToken(user);
   }
 
   public async user(): Promise<User> {
@@ -51,6 +94,9 @@ export class AuthService {
   }
 
   public token(): JwtToken {
-    return this.request.user as JwtToken;
+    console.log(this.request.cookies.access_token);
+    return this.jwtService.decode(
+      this.request.cookies.access_token,
+    ) as JwtToken;
   }
 }

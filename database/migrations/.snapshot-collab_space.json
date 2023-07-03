@@ -48,6 +48,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
+        },
         "created_at": {
           "name": "created_at",
           "type": "datetime",

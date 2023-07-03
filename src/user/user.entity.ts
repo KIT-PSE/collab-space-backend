@@ -24,6 +24,9 @@ export class User {
   @Property({ hidden: true })
   password!: string;
 
+  @Property({ hidden: true })
+  refreshToken?: string;
+
   @OneToMany(() => Category, (category) => category.owner, { hidden: true })
   categories = new Collection<Category>(this);
 
