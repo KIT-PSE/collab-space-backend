@@ -28,10 +28,9 @@ export class ChannelGateway implements OnGatewayConnection {
 
   constructor(private orm: MikroORM, private channels: ChannelService) {}
 
-  // todo: add authentication - only a logged in teacher should be able to open a room
-  @UseGuards(WsGuard)
   @SubscribeMessage('open-room')
   @UseRequestContext()
+  @UseGuards(WsGuard)
   public async openRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { userId: number; roomId: number },
@@ -73,6 +72,7 @@ export class ChannelGateway implements OnGatewayConnection {
 
   @SubscribeMessage('join-room-as-teacher')
   @UseRequestContext()
+  @UseGuards(WsGuard)
   public async joinChannelAsTeacher(
     @ConnectedSocket() client: Socket,
     @MessageBody()

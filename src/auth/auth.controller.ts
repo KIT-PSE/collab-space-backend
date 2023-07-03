@@ -39,7 +39,7 @@ export class AuthController {
   ) {
     const payload = await this.auth.login(data);
 
-    response.cookie('jwt', payload.token, { httpOnly: true });
+    response.cookie('jwt', payload.token);
 
     return payload;
   }

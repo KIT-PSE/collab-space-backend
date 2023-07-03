@@ -15,7 +15,7 @@ import { JwtStrategy } from './jwt.strategy';
       signOptions: { expiresIn: '1h' },
       verifyOptions: {
         ignoreExpiration: false,
-        audience: 'collab-space.com',
+        //audience: 'collab-space.com',
       },
     }),
   ],
