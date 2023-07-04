@@ -23,9 +23,12 @@ export class Channel {
   public teacher?: Teacher;
   public readonly students: Student[] = [];
 
-  constructor(public readonly room: Room, public readonly server: Server) {
-    // TODO: change id to be a 6 digit random number instead of a UUID to make it easier to type
-    this.id = crypto.randomUUID();
+  constructor(
+    public readonly room: Room,
+    public readonly server: Server,
+    readonly _id: string,
+  ) {
+    this.id = _id;
   }
 
   public async joinAsStudent(client: Socket, name: string) {

@@ -33,7 +33,12 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
-    const channel = new Channel(room, server);
+    let channelId = Math.floor(100000 + Math.random() * 900000).toString();
+    while (this.exists(channelId)) {
+      channelId = Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    const channel = new Channel(room, server, channelId);
     await channel.joinAsTeacher(client, user);
     this.channels[channel.id] = channel;
 
@@ -124,4 +129,11 @@ export class ChannelService {
 
     return channel.getUser(otherId).client;
   }
+}
+
+function generateRandomCode() {
+  const min = 100000; // Minimum 6-digit number
+  const max = 999999; // Maximum 6-digit number
+  const randomCode = Math.floor(Math.random() * (max - min + 1)) + min;
+  return randomCode.toString();
 }
