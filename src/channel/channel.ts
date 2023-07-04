@@ -15,12 +15,16 @@ export interface Teacher extends ChannelUser {
 
 export interface Student extends ChannelUser {
   name: string;
+  sessionId: string;
 }
 
 export class Channel {
   public teacher?: Teacher;
-  public readonly students: Student[] = [];
   private closeTimeout: NodeJS.Timeout;
+
+  public activeSessions: Map<string, Student> = new Map();
+  // saved sessions is temporary, will be stored in db later
+  private savedSessions: Map<string, Omit<Student, 'client'>> = new Map();
 
   constructor(
     public readonly room: Room,
@@ -28,15 +32,33 @@ export class Channel {
     public readonly id: string,
   ) {}
 
-  public async joinAsStudent(client: Socket, name: string) {
+  public async joinAsStudent(client: Socket, name: string, sessionId?: string) {
     await client.join(this.id);
-    this.students.push({ name, client, video: true, audio: true });
+    let student: Student;
+
+    if (sessionId && this.savedSessions.has(sessionId)) {
+      student = { ...this.savedSessions.get(sessionId), client };
+      this.activeSessions.set(client.id, student);
+    } else {
+      do {
+        sessionId = crypto.randomUUID();
+      } while (this.savedSessions.has(sessionId));
+      student = { name, client, video: true, audio: true, sessionId };
+
+      this.savedSessions.set(sessionId, student);
+      this.activeSessions.set(client.id, student);
+    }
 
     client.broadcast.to(this.id).emit('student-joined', {
       id: client.id,
-      name,
+      name: student.name,
       video: true,
       audio: true,
+    });
+
+    client.emit('session-id', {
+      sessionId: student.sessionId,
+      channelId: this.id,
     });
   }
 
@@ -64,20 +86,20 @@ export class Channel {
   }
 
   public async leaveAsStudent(client: Socket) {
-    await client.leave(this.id);
-    const index = this.students.findIndex((s) => s.client.id === client.id);
+    const student = this.activeSessions.get(client.id);
 
-    if (index < 0) {
-      return;
+    if (student) {
+      delete student.client;
+      this.activeSessions.delete(client.id);
+      this.savedSessions.set(student.sessionId, student);
+
+      await client.leave(this.id);
+      client.broadcast.to(this.id).emit('student-left', client.id);
     }
-
-    this.students.splice(index, 1);
-
-    client.broadcast.to(this.id).emit('student-left', client.id);
   }
 
   public isEmpty(): boolean {
-    return !this.teacher && this.students.length === 0;
+    return !this.teacher && this.activeSessions.size === 0;
   }
 
   public close() {
@@ -89,7 +111,7 @@ export class Channel {
       return this.teacher;
     }
 
-    const student = this.students.find((s) => s.client.id === clientId);
+    const student = this.activeSessions.get(clientId);
 
     if (student) {
       return student;
@@ -99,7 +121,7 @@ export class Channel {
   }
 
   public changeName(client: Socket, name: string) {
-    const student = this.students.find((s) => s.client.id === client.id);
+    const student = this.activeSessions.get(client.id);
 
     if (student) {
       student.name = name;
