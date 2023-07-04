@@ -130,10 +130,3 @@ export class ChannelService {
     return channel.getUser(otherId).client;
   }
 }
-
-function generateRandomCode() {
-  const min = 100000; // Minimum 6-digit number
-  const max = 999999; // Maximum 6-digit number
-  const randomCode = Math.floor(Math.random() * (max - min + 1)) + min;
-  return randomCode.toString();
-}

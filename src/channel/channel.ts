@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
