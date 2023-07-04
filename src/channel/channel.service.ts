@@ -108,9 +108,7 @@ export class ChannelService {
     }
 
     if (channel?.isEmpty()) {
-      if (this.closeTimeout) {
-        clearTimeout(this.closeTimeout);
-      }
+      this.clearCloseTimeout();
       this.closeTimeout = setTimeout(() => {
         if (channel?.isEmpty()) {
           channel.close();
