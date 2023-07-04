@@ -133,6 +133,6 @@ export class Channel {
         this.close();
         onTimeout();
       }
-    }, 1000 * 10);
+    }, 1000 * 60 * 10);
   }
 }
