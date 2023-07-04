@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
@@ -19,14 +18,14 @@ export interface Student extends ChannelUser {
 }
 
 export class Channel {
-  public readonly id: string;
   public teacher?: Teacher;
   public readonly students: Student[] = [];
 
-  constructor(public readonly room: Room, public readonly server: Server) {
-    // TODO: change id to be a 6 digit random number instead of a UUID to make it easier to type
-    this.id = crypto.randomUUID();
-  }
+  constructor(
+    public readonly room: Room,
+    public readonly server: Server,
+    public readonly id: string,
+  ) {}
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
