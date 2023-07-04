@@ -33,10 +33,10 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
-    let channelId = Math.floor(100000 + Math.random() * 900000).toString();
-    while (this.exists(channelId)) {
+    let channelId;
+    do {
       channelId = Math.floor(100000 + Math.random() * 900000).toString();
-    }
+    } while (this.exists(channelId));
 
     const channel = new Channel(room, server, channelId);
     await channel.joinAsTeacher(client, user);

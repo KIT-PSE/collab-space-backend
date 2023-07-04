@@ -18,17 +18,14 @@ export interface Student extends ChannelUser {
 }
 
 export class Channel {
-  public readonly id: string;
   public teacher?: Teacher;
   public readonly students: Student[] = [];
 
   constructor(
     public readonly room: Room,
     public readonly server: Server,
-    readonly _id: string,
-  ) {
-    this.id = _id;
-  }
+    public readonly id: string,
+  ) {}
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
