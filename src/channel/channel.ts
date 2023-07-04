@@ -20,6 +20,7 @@ export interface Student extends ChannelUser {
 export class Channel {
   public teacher?: Teacher;
   public readonly students: Student[] = [];
+  private closeTimeout: NodeJS.Timeout;
 
   constructor(
     public readonly room: Room,
@@ -116,5 +117,22 @@ export class Channel {
 
   public toString(): string {
     return `Channel{${this.id}}`;
+  }
+
+  public clearCloseTimeout() {
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = undefined;
+    }
+  }
+
+  public setCloseTimeout(onTimeout: () => void) {
+    this.clearCloseTimeout();
+    this.closeTimeout = setTimeout(() => {
+      if (this.isEmpty()) {
+        this.close();
+        onTimeout();
+      }
+    }, 1000 * 10);
   }
 }

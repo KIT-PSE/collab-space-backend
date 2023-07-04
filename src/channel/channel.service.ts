@@ -9,7 +9,6 @@ import { RoomService } from '../room/room.service';
 export class ChannelService {
   private readonly logger = new Logger(ChannelService.name);
   private readonly channels: { [key: string]: Channel } = {};
-  private closeTimeout: NodeJS.Timeout;
 
   constructor(
     private readonly rooms: RoomService,
@@ -65,7 +64,7 @@ export class ChannelService {
 
     await channel.joinAsStudent(client, name);
 
-    this.clearCloseTimeout();
+    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as student ${name}`);
 
     return channel;
@@ -90,7 +89,7 @@ export class ChannelService {
 
     await channel.joinAsTeacher(client, user);
 
-    this.clearCloseTimeout();
+    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as teacher ${user}`);
 
     return channel;
@@ -108,14 +107,11 @@ export class ChannelService {
     }
 
     if (channel?.isEmpty()) {
-      this.clearCloseTimeout();
-      this.closeTimeout = setTimeout(() => {
-        if (channel?.isEmpty()) {
-          channel.close();
-          delete this.channels[channelId];
-          this.logger.debug(`Closed ${channel}`);
-        }
-      }, 1000 * 60 * 10);
+      channel.clearCloseTimeout();
+      channel.setCloseTimeout(() => {
+        delete this.channels[channelId];
+        this.logger.debug(`Closed ${channel}`);
+      });
     }
   }
 
@@ -136,12 +132,5 @@ export class ChannelService {
     const channel = this.fromClientOrFail(client);
 
     return channel.getUser(otherId).client;
-  }
-
-  private clearCloseTimeout() {
-    if (this.closeTimeout) {
-      clearTimeout(this.closeTimeout);
-      this.closeTimeout = undefined;
-    }
   }
 }
