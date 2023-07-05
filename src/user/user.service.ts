@@ -48,4 +48,11 @@ export class UserService {
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
   }
+
+  public async makeAdmin(id: number): Promise<User> {
+    const user = await this.repository.findOne({ id });
+    user.role = 'admin';
+    await this.em.persistAndFlush(user);
+    return user;
+  }
 }
