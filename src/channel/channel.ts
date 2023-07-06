@@ -20,6 +20,7 @@ export interface Student extends ChannelUser {
 
 export class Channel {
   public teacher?: Teacher;
+  public readonly students: Student[] = [];
   private closeTimeout: NodeJS.Timeout;
 
   public activeSessions: Map<string, Student> = new Map();

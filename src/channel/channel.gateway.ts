@@ -94,7 +94,7 @@ export class ChannelGateway implements OnGatewayConnection {
   }
 
   private channelState(channel: Channel) {
-    const teacher = {
+    const teacher = channel.teacher && {
       id: channel.teacher.client.id,
       user: channel.teacher.user,
       video: channel.teacher.video,
