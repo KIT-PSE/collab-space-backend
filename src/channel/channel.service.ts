@@ -64,6 +64,7 @@ export class ChannelService {
 
     await channel.joinAsStudent(client, name);
 
+    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as student ${name}`);
 
     return channel;
@@ -88,6 +89,7 @@ export class ChannelService {
 
     await channel.joinAsTeacher(client, user);
 
+    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as teacher ${user}`);
 
     return channel;
@@ -105,9 +107,11 @@ export class ChannelService {
     }
 
     if (channel?.isEmpty()) {
-      channel.close();
-      delete this.channels[channelId];
-      this.logger.debug(`Closed ${channel}`);
+      channel.clearCloseTimeout();
+      channel.setCloseTimeout(() => {
+        delete this.channels[channelId];
+        this.logger.debug(`Closed ${channel}`);
+      });
     }
   }
 
