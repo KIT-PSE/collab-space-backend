@@ -53,7 +53,6 @@ export class ChannelGateway implements OnGatewayConnection {
     payload: {
       name: string;
       channelId: string;
-      sessionId?: string;
     },
   ) {
     if (!this.channels.exists(payload.channelId)) {
@@ -64,7 +63,6 @@ export class ChannelGateway implements OnGatewayConnection {
       client,
       payload.channelId,
       payload.name,
-      payload.sessionId,
     );
 
     return this.channelState(channel);
@@ -101,14 +99,12 @@ export class ChannelGateway implements OnGatewayConnection {
       audio: channel.teacher.audio,
     };
 
-    const students = Array.from(channel.activeSessions.values()).map(
-      (student) => ({
-        id: student.client?.id,
-        name: student.name,
-        video: student.video,
-        audio: student.audio,
-      }),
-    );
+    const students = Array.from(channel.students.values()).map((student) => ({
+      id: student.client?.id,
+      name: student.name,
+      video: student.video,
+      audio: student.audio,
+    }));
 
     return {
       room: channel.room,

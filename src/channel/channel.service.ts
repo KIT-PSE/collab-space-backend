@@ -55,7 +55,6 @@ export class ChannelService {
     client: Socket,
     channelId: string,
     name: string,
-    sessionId?: string,
   ): Promise<Channel> {
     const channel = this.channels[channelId];
 
@@ -63,7 +62,7 @@ export class ChannelService {
       throw new WsException('Channel not found');
     }
 
-    await channel.joinAsStudent(client, name, sessionId);
+    await channel.joinAsStudent(client, name);
 
     channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as student ${name}`);
