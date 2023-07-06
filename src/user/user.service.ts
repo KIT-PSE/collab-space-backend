@@ -49,9 +49,17 @@ export class UserService {
     await this.repository.nativeDelete({ id });
   }
 
-  public async makeAdmin(id: number): Promise<User> {
+  public async changeRole(id: number): Promise<User> {
     const user = await this.repository.findOne({ id });
-    user.role = 'admin';
+
+    if (!user) throw new Error('User not found');
+
+    if (user.role === 'admin') {
+      user.role = 'user';
+    } else if (user.role === 'user') {
+      user.role = 'admin';
+    }
+
     await this.em.persistAndFlush(user);
     return user;
   }

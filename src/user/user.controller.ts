@@ -15,8 +15,8 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard, AdminGuard)
-  @Post('makeAdmin')
-  public async makeAdmin(@Body() data: { id: number }) {
-    return await this.user.makeAdmin(data.id);
+  @Post('changeRole')
+  public async changeRole(@Body() data: { id: number }) {
+    return await this.user.changeRole(data.id);
   }
 }
