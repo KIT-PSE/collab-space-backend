@@ -5,18 +5,16 @@ import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly user: UserService) {}
+  constructor(private readonly userService: UserService) {}
   @UseGuards(AuthGuard, AdminGuard)
   @Get('findAll')
   public async findAll() {
-    const users = await this.user.findAll();
-
-    return users;
+    return await this.userService.findAll();
   }
 
   @UseGuards(AuthGuard, AdminGuard)
   @Post('changeRole')
   public async changeRole(@Body() data: { id: number }) {
-    return await this.user.changeRole(data.id);
+    return await this.userService.changeRole(data.id);
   }
 }

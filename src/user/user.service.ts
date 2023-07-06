@@ -52,7 +52,9 @@ export class UserService {
   public async changeRole(id: number): Promise<User> {
     const user = await this.repository.findOne({ id });
 
-    if (!user) throw new Error('User not found');
+    if (!user) {
+      throw new Error('User not found');
+    }
 
     if (user.role === 'admin') {
       user.role = 'user';
