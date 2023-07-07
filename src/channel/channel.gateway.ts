@@ -104,6 +104,7 @@ export class ChannelGateway implements OnGatewayConnection {
       name: student.name,
       video: student.video,
       audio: student.audio,
+      handSignal: student.handSignal,
     }));
 
     return {
