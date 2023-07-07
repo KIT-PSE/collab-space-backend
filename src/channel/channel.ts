@@ -7,6 +7,7 @@ export interface ChannelUser {
   client: Socket;
   video: boolean;
   audio: boolean;
+  handSignal: boolean;
 }
 
 export interface Teacher extends ChannelUser {
@@ -32,7 +33,13 @@ export class Channel {
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
 
-    const student = { name, client, video: true, audio: true };
+    const student = {
+      name,
+      client,
+      video: true,
+      audio: true,
+      handSignal: false,
+    };
     this.students.set(client.id, student);
 
     client.broadcast.to(this.id).emit('student-joined', {
@@ -40,6 +47,7 @@ export class Channel {
       name: student.name,
       video: true,
       audio: true,
+      handSignal: false,
     });
   }
 
@@ -49,13 +57,20 @@ export class Channel {
     }
 
     await client.join(this.id);
-    this.teacher = { user, client, video: true, audio: true };
+    this.teacher = {
+      user,
+      client,
+      video: true,
+      audio: true,
+      handSignal: false,
+    };
 
     client.broadcast.to(this.id).emit('teacher-joined', {
       id: client.id,
       user,
       video: true,
       audio: true,
+      handSignal: false,
     });
   }
 
@@ -114,6 +129,14 @@ export class Channel {
     if (user) {
       user.video = video;
       user.audio = audio;
+    }
+  }
+
+  public updateHandSignal(client: Socket, handSignal: boolean) {
+    const user = this.getUser(client.id);
+
+    if (user) {
+      user.handSignal = handSignal;
     }
   }
 
