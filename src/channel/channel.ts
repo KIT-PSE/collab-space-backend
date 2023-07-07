@@ -8,7 +8,6 @@ export interface ChannelUser {
   client: Socket;
   video: boolean;
   audio: boolean;
-  handSignal: boolean;
 }
 
 export interface Teacher extends ChannelUser {
@@ -17,6 +16,7 @@ export interface Teacher extends ChannelUser {
 
 export interface Student extends ChannelUser {
   name: string;
+  handSignal: boolean;
 }
 
 export class Channel {
@@ -48,14 +48,13 @@ export class Channel {
     }
 
     await client.join(this.id);
-    this.teacher = { user, client, video: true, audio: true, handSignal: false };
+    this.teacher = { user, client, video: true, audio: true };
 
     client.broadcast.to(this.id).emit('teacher-joined', {
       id: client.id,
       user,
       video: true,
       audio: true,
-      handSignal: false,
     });
   }
 
@@ -101,6 +100,17 @@ export class Channel {
     throw new WsException(`User not found in ${this}`);
   }
 
+  public getStudent(clientId: string): Student {
+
+    const student = this.students.find((s) => s.client.id === clientId);
+
+    if (student) {
+      return student;
+    }
+
+    throw new WsException(`User not found in ${this}`);
+  }
+
   public changeName(client: Socket, name: string) {
     const student = this.students.find((s) => s.client.id === client.id);
 
@@ -119,10 +129,10 @@ export class Channel {
   }
 
   public updateHandSignal(client: Socket, handSignal: boolean) {
-    const user = this.getUser(client.id);
+    const student = this.getStudent(client.id);
 
-    if (user) {
-      user.handSignal = handSignal;
+    if (student) {
+      student.handSignal = handSignal;
     }
   }
 
