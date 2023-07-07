@@ -178,6 +178,24 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  @SubscribeMessage('update-handSignal')
+  @UseRequestContext()
+  public async updateHandSignal(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { handSignal: boolean },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.updateHandSignal(client, payload.handSignal);
+
+    this.server.to(channel.id).emit('update-handSignal', {
+      id: client.id,
+      handSignal: payload.handSignal,
+
+    });
+
+    return true;
+  }
+
   public async handleConnection(client: Socket) {
     /*
      * This is a workaround for getting the client's rooms in the disconnecting event.
