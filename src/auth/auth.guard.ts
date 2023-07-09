@@ -15,9 +15,7 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     const _canActivate = (await super.canActivate(context)) as boolean;
 
     if (_canActivate) {
-      const request = context.switchToHttp().getRequest();
       const response = context.switchToHttp().getResponse();
-
       const user = await this.auth.user();
 
       const payload = { sub: user.id };
