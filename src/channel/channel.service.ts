@@ -4,6 +4,7 @@ import { WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
+import { Room } from '../room/room.entity';
 
 @Injectable()
 export class ChannelService {
@@ -132,5 +133,13 @@ export class ChannelService {
     const channel = this.fromClientOrFail(client);
 
     return channel.getUser(otherId).client;
+  }
+
+  public getChannelFromRoom(room: Room): Channel {
+    for (const channel of Object.values(this.channels)) {
+      if (channel.room.id === room.id) {
+        return channel;
+      }
+    }
   }
 }
