@@ -99,7 +99,7 @@ export class ChannelGateway implements OnGatewayConnection {
       audio: channel.teacher.audio,
     };
 
-    const students = channel.students.map((student) => ({
+    const students = Array.from(channel.students.values()).map((student) => ({
       id: student.client.id,
       name: student.name,
       video: student.video,
@@ -191,7 +191,6 @@ export class ChannelGateway implements OnGatewayConnection {
     this.server.to(channel.id).emit('update-handSignal', {
       id: client.id,
       handSignal: payload.handSignal,
-
     });
 
     return true;
