@@ -21,6 +21,9 @@ export class Room {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
+  @Property()
+  channelId?: string;
+
   constructor(name: string, category: Category, password?: string) {
     this.name = name;
     this.category = category;
