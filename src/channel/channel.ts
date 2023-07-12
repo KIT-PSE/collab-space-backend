@@ -109,7 +109,7 @@ export class Channel {
   }
 
   public getStudent(clientId: string): Student {
-    const student = this.students.find((s) => s.client.id === clientId);
+    const student = this.students.get(clientId);
 
     if (student) {
       return student;
