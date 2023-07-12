@@ -4,7 +4,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Category } from './category.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { User } from '../user/user.entity';
-import { ChannelService } from '../channel/channel.service';
 
 @Injectable()
 export class CategoryService {
@@ -12,24 +11,12 @@ export class CategoryService {
     private readonly em: EntityManager,
     @InjectRepository(Category)
     private readonly repository: EntityRepository<Category>,
-    private readonly channels: ChannelService,
   ) {}
 
   public async allFromUser(user: User): Promise<Category[]> {
-    const categories = await user.categories.loadItems({
+    return user.categories.loadItems({
       populate: ['rooms'],
     });
-
-    for (const category of categories) {
-      for (const room of category.rooms) {
-        const channel = this.channels.getChannelFromRoom(room);
-        if (channel) {
-          room.channelId = channel.id;
-        }
-      }
-    }
-
-    return categories;
   }
 
   public async get(id: number, owner: User): Promise<Category> {

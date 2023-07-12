@@ -4,7 +4,6 @@ import { WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
-import { Room } from '../room/room.entity';
 
 @Injectable()
 export class ChannelService {
@@ -34,12 +33,7 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
-    let channelId;
-    do {
-      channelId = Math.floor(100000 + Math.random() * 900000).toString();
-    } while (this.exists(channelId));
-
-    const channel = new Channel(room, server, channelId);
+    const channel = new Channel(room, server);
     await channel.joinAsTeacher(client, user);
     this.channels[channel.id] = channel;
 
@@ -65,7 +59,6 @@ export class ChannelService {
 
     await channel.joinAsStudent(client, name);
 
-    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as student ${name}`);
 
     return channel;
@@ -90,7 +83,6 @@ export class ChannelService {
 
     await channel.joinAsTeacher(client, user);
 
-    channel.clearCloseTimeout();
     this.logger.debug(`Joined ${channel} as teacher ${user}`);
 
     return channel;
@@ -108,11 +100,9 @@ export class ChannelService {
     }
 
     if (channel?.isEmpty()) {
-      channel.clearCloseTimeout();
-      channel.setCloseTimeout(() => {
-        delete this.channels[channelId];
-        this.logger.debug(`Closed ${channel}`);
-      });
+      channel.close();
+      delete this.channels[channelId];
+      this.logger.debug(`Closed ${channel}`);
     }
   }
 
@@ -133,13 +123,5 @@ export class ChannelService {
     const channel = this.fromClientOrFail(client);
 
     return channel.getUser(otherId).client;
-  }
-
-  public getChannelFromRoom(room: Room): Channel {
-    for (const channel of Object.values(this.channels)) {
-      if (channel.room.id === room.id) {
-        return channel;
-      }
-    }
   }
 }

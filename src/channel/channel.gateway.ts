@@ -92,18 +92,19 @@ export class ChannelGateway implements OnGatewayConnection {
   }
 
   private channelState(channel: Channel) {
-    const teacher = channel.teacher && {
+    const teacher = {
       id: channel.teacher.client.id,
       user: channel.teacher.user,
       video: channel.teacher.video,
       audio: channel.teacher.audio,
     };
 
-    const students = Array.from(channel.students.values()).map((student) => ({
-      id: student.client?.id,
+    const students = channel.students.map((student) => ({
+      id: student.client.id,
       name: student.name,
       video: student.video,
       audio: student.audio,
+      handSignal: student.handSignal,
     }));
 
     return {
@@ -173,6 +174,24 @@ export class ChannelGateway implements OnGatewayConnection {
       id: client.id,
       video: payload.video,
       audio: payload.audio,
+    });
+
+    return true;
+  }
+
+  @SubscribeMessage('update-handSignal')
+  @UseRequestContext()
+  public async updateHandSignal(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { handSignal: boolean },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.updateHandSignal(client, payload.handSignal);
+
+    this.server.to(channel.id).emit('update-handSignal', {
+      id: client.id,
+      handSignal: payload.handSignal,
+
     });
 
     return true;
