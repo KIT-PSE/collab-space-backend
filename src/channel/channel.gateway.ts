@@ -99,11 +99,12 @@ export class ChannelGateway implements OnGatewayConnection {
       audio: channel.teacher.audio,
     };
 
-    const students = channel.students.map((student) => ({
-      id: student.client.id,
+    const students = Array.from(channel.students.values()).map((student) => ({
+      id: student.client?.id,
       name: student.name,
       video: student.video,
       audio: student.audio,
+      handSignal: student.handSignal,
     }));
 
     return {

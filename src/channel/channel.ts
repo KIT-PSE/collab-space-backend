@@ -7,7 +7,6 @@ export interface ChannelUser {
   client: Socket;
   video: boolean;
   audio: boolean;
-  handSignal: boolean;
 }
 
 export interface Teacher extends ChannelUser {
@@ -16,12 +15,14 @@ export interface Teacher extends ChannelUser {
 
 export interface Student extends ChannelUser {
   name: string;
+  handSignal: boolean;
 }
 
 export class Channel {
   public teacher?: Teacher;
-  public readonly students: Student[] = [];
   private closeTimeout: NodeJS.Timeout;
+
+  public students: Map<string, Student> = new Map();
 
   constructor(
     public readonly room: Room,
@@ -31,11 +32,19 @@ export class Channel {
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
-    this.students.push({ name, client, video: true, audio: true, handSignal: false });
+
+    const student = {
+      name,
+      client,
+      video: true,
+      audio: true,
+      handSignal: false,
+    };
+    this.students.set(client.id, student);
 
     client.broadcast.to(this.id).emit('student-joined', {
       id: client.id,
-      name,
+      name: student.name,
       video: true,
       audio: true,
       handSignal: false,
@@ -48,14 +57,13 @@ export class Channel {
     }
 
     await client.join(this.id);
-    this.teacher = { user, client, video: true, audio: true, handSignal: false };
+    this.teacher = { user, client, video: true, audio: true };
 
     client.broadcast.to(this.id).emit('teacher-joined', {
       id: client.id,
       user,
       video: true,
       audio: true,
-      handSignal: false,
     });
   }
 
@@ -67,20 +75,19 @@ export class Channel {
   }
 
   public async leaveAsStudent(client: Socket) {
-    await client.leave(this.id);
-    const index = this.students.findIndex((s) => s.client.id === client.id);
+    const student = this.students.get(client.id);
 
-    if (index < 0) {
-      return;
+    if (student) {
+      delete student.client;
+      this.students.delete(client.id);
+
+      await client.leave(this.id);
+      client.broadcast.to(this.id).emit('student-left', client.id);
     }
-
-    this.students.splice(index, 1);
-
-    client.broadcast.to(this.id).emit('student-left', client.id);
   }
 
   public isEmpty(): boolean {
-    return !this.teacher && this.students.length === 0;
+    return !this.teacher && this.students.size === 0;
   }
 
   public close() {
@@ -92,7 +99,17 @@ export class Channel {
       return this.teacher;
     }
 
-    const student = this.students.find((s) => s.client.id === clientId);
+    const student = this.students.get(clientId);
+
+    if (student) {
+      return student;
+    }
+
+    throw new WsException(`User not found in ${this}`);
+  }
+
+  public getStudent(clientId: string): Student {
+    const student = this.students.get(clientId);
 
     if (student) {
       return student;
@@ -102,7 +119,7 @@ export class Channel {
   }
 
   public changeName(client: Socket, name: string) {
-    const student = this.students.find((s) => s.client.id === client.id);
+    const student = this.students.get(client.id);
 
     if (student) {
       student.name = name;
@@ -119,10 +136,10 @@ export class Channel {
   }
 
   public updateHandSignal(client: Socket, handSignal: boolean) {
-    const user = this.getUser(client.id);
+    const student = this.getStudent(client.id);
 
-    if (user) {
-      user.handSignal = handSignal;
+    if (student) {
+      student.handSignal = handSignal;
     }
   }
 
