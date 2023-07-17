@@ -1,5 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
+import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class AuthGuard extends PassportAuthGuard('jwt') {}
+export class AuthGuard extends PassportAuthGuard('jwt') {
+  constructor(
+    private readonly auth: AuthService,
+    private readonly jwtService: JwtService,
+  ) {
+    super();
+  }
+  async canActivate(context) {
+    const canActivateResult = (await super.canActivate(context)) as boolean;
+
+    if (canActivateResult) {
+      const response = context.switchToHttp().getResponse();
+      const user = await this.auth.user();
+
+      const payload = { sub: user.id };
+      const token = this.jwtService.sign(payload);
+      response.cookie('jwt', token, { httpOnly: true });
+    }
+
+    return canActivateResult;
+  }
+}
