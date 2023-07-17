@@ -12,9 +12,9 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     super();
   }
   async canActivate(context) {
-    const _canActivate = (await super.canActivate(context)) as boolean;
+    const canActivateResult = (await super.canActivate(context)) as boolean;
 
-    if (_canActivate) {
+    if (canActivateResult) {
       const response = context.switchToHttp().getResponse();
       const user = await this.auth.user();
 
@@ -23,6 +23,6 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
       response.cookie('jwt', token, { httpOnly: true });
     }
 
-    return _canActivate;
+    return canActivateResult;
   }
 }
