@@ -1,5 +1,13 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { Category } from '../category/category.entity';
+import { Note } from '../note/note.entity';
 
 @Entity({ tableName: 'rooms' })
 export class Room {
@@ -23,6 +31,9 @@ export class Room {
 
   @Property()
   channelId?: string;
+
+  @OneToMany(() => Note, (note) => note.room)
+  notes = new Collection<Note>(this);
 
   constructor(name: string, category: Category, password?: string) {
     this.name = name;
