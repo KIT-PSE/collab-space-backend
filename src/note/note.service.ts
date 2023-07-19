@@ -4,6 +4,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Note } from './note.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { RoomService } from '../room/room.service';
+import { Room } from '../room/room.entity';
 
 @Injectable()
 export class NoteService {
@@ -14,8 +15,7 @@ export class NoteService {
     private readonly roomService: RoomService,
   ) {}
 
-  public async addNote(roomId: number, name: string) {
-    const room = await this.roomService.findOneWithCategory(roomId);
+  public async addNote(room: Room, name: string) {
     const note = new Note(name, room);
     await this.em.persistAndFlush(note);
     return note;
@@ -30,7 +30,6 @@ export class NoteService {
 
   public async getNotes(roomId: number) {
     const room = await this.roomService.findOneWithCategory(roomId);
-    const notes = await this.repository.find({ room });
-    return notes;
+    return await this.repository.find({ room });
   }
 }

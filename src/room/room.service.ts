@@ -52,4 +52,9 @@ export class RoomService {
 
     await this.em.removeAndFlush(room);
   }
+
+  public async getNotes(id: number): Promise<Note[]> {
+    const room = await this.repository.findOneOrFail({ id });
+    return room.notes.loadItems();
+  }
 }

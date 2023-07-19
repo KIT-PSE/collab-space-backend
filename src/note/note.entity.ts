@@ -1,4 +1,10 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  types,
+} from '@mikro-orm/core';
 import { Room } from '../room/room.entity';
 
 @Entity({ tableName: 'notes' })
@@ -9,8 +15,8 @@ export class Note {
   @Property()
   name: string;
 
-  @Property()
-  content: string;
+  @Property({ type: types.text, nullable: true })
+  content;
 
   @Property()
   createdAt: Date = new Date();

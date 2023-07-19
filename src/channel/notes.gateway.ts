@@ -1,7 +1,6 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -9,8 +8,8 @@ import {
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
-import { Channel } from './channel';
 import * as dotenv from 'dotenv';
+import { NoteService } from '../note/note.service';
 
 dotenv.config();
 
@@ -24,5 +23,37 @@ export class NotesGateway {
   @WebSocketServer()
   public server: Server;
 
-  constructor(private orm: MikroORM, private channels: ChannelService) {}
+  constructor(
+    private orm: MikroORM,
+    private channels: ChannelService,
+    private notes: NoteService,
+  ) {}
+
+  @SubscribeMessage('add-note')
+  @UseRequestContext()
+  public async addNote(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { name: string },
+  ) {
+    const channel = this.channels.fromClientOrFail(client);
+    const note = await this.notes.addNote(channel.room, payload.name);
+
+    client.broadcast.to(channel.id).emit('note-added', note);
+
+    return note;
+  }
+
+  @SubscribeMessage('update-note')
+  @UseRequestContext()
+  public async updateNote(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { noteId: number; content: string },
+  ) {
+    const channel = this.channels.fromClientOrFail(client);
+    const note = await this.notes.updateNote(payload.noteId, payload.content);
+
+    client.broadcast.to(channel.id).emit('note-updated', note);
+
+    return true;
+  }
 }

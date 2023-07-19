@@ -9,4 +9,4 @@ import { Note } from './note.entity';
   providers: [NoteService],
   exports: [NoteService],
 })
-export class RoomModule {}
+export class NoteModule {}
