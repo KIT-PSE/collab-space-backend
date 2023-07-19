@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
+import { fabric } from 'fabric';
 
 @Injectable()
 export class ChannelService {
@@ -34,12 +35,17 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
+    const canvas = new fabric.Canvas(null, {
+      width: 2500,
+      height: 2500,
+    });
+
     let channelId;
     do {
       channelId = Math.floor(100000 + Math.random() * 900000).toString();
     } while (this.exists(channelId));
 
-    const channel = new Channel(room, server, channelId);
+    const channel = new Channel(room, server, channelId, canvas);
     await channel.joinAsTeacher(client, user);
     this.channels[channel.id] = channel;
 

@@ -24,6 +24,9 @@ export class Room {
   @Property()
   channelId?: string;
 
+  @Property()
+  whiteboardCanvas = '';
+
   constructor(name: string, category: Category, password?: string) {
     this.name = name;
     this.category = category;

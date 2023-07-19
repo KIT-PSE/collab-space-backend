@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
 import { WsException } from '@nestjs/websockets';
+import { fabric } from 'fabric';
 
 export interface ChannelUser {
   client: Socket;
@@ -28,6 +29,7 @@ export class Channel {
     public readonly room: Room,
     public readonly server: Server,
     public readonly id: string,
+    public canvas: fabric.Canvas,
   ) {}
 
   public async joinAsStudent(client: Socket, name: string) {
