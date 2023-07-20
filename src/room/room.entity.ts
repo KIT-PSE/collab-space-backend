@@ -5,7 +5,6 @@ import {
   Property,
   types,
 } from '@mikro-orm/core';
-import {} from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
 
 @Entity({ tableName: 'rooms' })
