@@ -251,12 +251,12 @@
         },
         "whiteboard_canvas": {
           "name": "whiteboard_canvas",
-          "type": "text",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "mappedType": "string"
         }
       },
       "name": "rooms",

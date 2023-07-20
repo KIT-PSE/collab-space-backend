@@ -148,4 +148,9 @@ export class ChannelService {
       }
     }
   }
+
+  public getWhiteboardFromRoom(room: Room) {
+    const channel = this.getChannelFromRoom(room);
+    return channel.canvas.toJSON();
+  }
 }

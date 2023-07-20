@@ -4,6 +4,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Room } from './room.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
+import * as LZString from 'lz-string';
 
 @Injectable()
 export class RoomService {
@@ -55,7 +56,15 @@ export class RoomService {
   public async getWhiteboard(id: number): Promise<string> {
     const room = await this.repository.findOneOrFail({ id });
 
-    return room.whiteboardCanvas || '';
+    if (
+      !room.whiteboardCanvas ||
+      (room.whiteboardCanvas && !room.whiteboardCanvas.toString())
+    ) {
+      return '';
+    }
+
+    //return room.whiteboardCanvas.toString();
+    return LZString.decompressFromUTF16(room.whiteboardCanvas.toString());
   }
 
   public async updateWhiteboard(id: number, whiteboard: string): Promise<Room> {

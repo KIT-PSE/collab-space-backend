@@ -5,6 +5,7 @@ import {
   Property,
   types,
 } from '@mikro-orm/core';
+import {} from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
 
 @Entity({ tableName: 'rooms' })
@@ -30,7 +31,7 @@ export class Room {
   @Property()
   channelId?: string;
 
-  @Property({ type: types.text, nullable: true })
+  @Property({ type: types.blob, nullable: true })
   whiteboardCanvas?;
 
   constructor(name: string, category: Category, password?: string) {

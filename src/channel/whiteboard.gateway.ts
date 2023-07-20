@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import * as LZString from 'lz-string';
 import { Server, Socket } from 'socket.io';
 import * as dotenv from 'dotenv';
 import { ChannelService } from './channel.service';
@@ -46,7 +47,22 @@ export class WhiteboardGateway {
       }),
     );
 
-    const json = JSON.stringify(channel.canvas.toJSON());
-    await this.rooms.updateWhiteboard(channel.room.id, json);
+    const json = channel.canvas.toJSON();
+    /*const copy = { ...json, objects: [] };
+
+    (json.objects || []).map((object) => {
+      const objectCopy = {};
+      for (const key in object) {
+        const val = object[key];
+        if (val !== null && val !== 0) {
+          objectCopy[key] = object[key];
+        }
+      }
+      copy.objects.push(objectCopy);
+    });*/
+
+    const compressed = LZString.compressToUTF16(JSON.stringify(json));
+
+    await this.rooms.updateWhiteboard(channel.room.id, compressed);
   }
 }
