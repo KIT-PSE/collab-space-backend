@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
@@ -14,7 +15,6 @@ import { AuthService } from '../auth/auth.service';
 import { CategoryService } from '../category/category.service';
 
 @Controller('category/:category/room')
-@UseGuards(AuthGuard)
 export class RoomController {
   constructor(
     private readonly rooms: RoomService,
@@ -23,6 +23,7 @@ export class RoomController {
   ) {}
 
   @Post('/')
+  @UseGuards(AuthGuard)
   public async create(
     @Param('category') categoryId: number,
     @Body() data: CreateRoom,
@@ -33,6 +34,7 @@ export class RoomController {
   }
 
   @Put('/:room')
+  @UseGuards(AuthGuard)
   public async update(
     @Param('category') categoryId: number,
     @Param('room') roomId: number,
@@ -44,6 +46,7 @@ export class RoomController {
   }
 
   @Delete('/:room')
+  @UseGuards(AuthGuard)
   public async delete(
     @Param('category') categoryId: number,
     @Param('room') roomId: number,
@@ -51,5 +54,14 @@ export class RoomController {
     const user = await this.auth.user();
     const category = await this.categories.get(categoryId, user);
     return this.rooms.delete(roomId, category);
+  }
+
+  @Get('/:room/whiteboard')
+  public async getNotes(
+    @Param('category') categoryId: number,
+    @Param('room') roomId: number,
+  ) {
+    const whiteboard = await this.rooms.getWhiteboard(roomId);
+    return { whiteboard };
   }
 }

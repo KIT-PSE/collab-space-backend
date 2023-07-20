@@ -11,6 +11,8 @@ import * as dotenv from 'dotenv';
 import { ChannelService } from './channel.service';
 import { Logger } from '@nestjs/common';
 import { fabric } from 'fabric';
+import { RoomService } from '../room/room.service';
+import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 
 dotenv.config();
 
@@ -26,9 +28,14 @@ export class WhiteboardGateway {
   @WebSocketServer()
   public server: Server;
 
-  constructor(private channels: ChannelService) {}
+  constructor(
+    private orm: MikroORM,
+    private channels: ChannelService,
+    private rooms: RoomService,
+  ) {}
 
   @SubscribeMessage('whiteboard-change')
+  @UseRequestContext()
   public async whiteboardChange(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { path: fabric.Path },
@@ -44,5 +51,6 @@ export class WhiteboardGateway {
     );
 
     const json = JSON.stringify(channel.canvas.toJSON());
+    await this.rooms.updateWhiteboard(channel.room.id, json);
   }
 }
