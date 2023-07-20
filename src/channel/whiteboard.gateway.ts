@@ -1,7 +1,6 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -23,8 +22,6 @@ const WEB_SOCKET_OPTIONS =
 
 @WebSocketGateway(WEB_SOCKET_OPTIONS)
 export class WhiteboardGateway {
-  private readonly logger = new Logger(WhiteboardGateway.name);
-
   @WebSocketServer()
   public server: Server;
 
