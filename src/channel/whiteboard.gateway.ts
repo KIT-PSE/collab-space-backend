@@ -8,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import * as dotenv from 'dotenv';
 import { ChannelService } from './channel.service';
-import { Logger } from '@nestjs/common';
 import { fabric } from 'fabric';
 import { RoomService } from '../room/room.service';
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
