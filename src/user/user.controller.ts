@@ -1,7 +1,14 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
+
+export type EditUser = {
+  id: number;
+  organization: string;
+  name: string;
+  email: string;
+};
 
 @Controller('user')
 export class UserController {
@@ -12,5 +19,12 @@ export class UserController {
     const users = await this.user.findAll();
 
     return users;
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('changeOrg')
+  public async changeUserData(@Body() data: EditUser): Promise<boolean> {
+    await this.user.changeUserData(data);
+    return true;
   }
 }
