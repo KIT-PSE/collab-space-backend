@@ -45,6 +45,38 @@ export class UserService {
     return user;
   }
 
+  public async changePassword(
+      userId: number,
+      currentPassword: string,
+      newPassword: string,
+  ): Promise<void> {
+    const user = await this.repository.findOne({ id: userId });
+
+    if (!user) {
+      throw new Error('Benutzer nicht gefunden.');
+    }
+
+    // Überprüfe das aktuelle Passwort
+    const isCurrentPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new Error('Falsches aktuelles Passwort.');
+    }
+
+    // Generiere das Hash für das neue Passwort
+    const newHashedPassword = await bcrypt.hash(
+        newPassword,
+        UserService.SALT_OR_ROUNDS,
+    );
+
+    // Speichere das neue Passwort in der Datenbank
+    user.password = newHashedPassword;
+    await this.em.persistAndFlush(user);
+  }
+
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
   }

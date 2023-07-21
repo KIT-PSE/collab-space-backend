@@ -17,4 +17,10 @@ export class UserController {
   public async changeRole(@Body() data: { id: number }) {
     return await this.userService.changeRole(data.id);
   }
+
+  @UseGuards(AuthGuard)
+  @Post('changePassword')
+  public async changePassword(@Body() data: { id: number, currentPassword: string, newPassword: string }) {
+    await this.userService.changePassword(data.id, data.currentPassword, data.newPassword);
+  }
 }
