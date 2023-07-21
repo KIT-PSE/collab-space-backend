@@ -50,11 +50,12 @@ export class UserService {
     await this.repository.nativeDelete({ id });
   }
 
-  public async changeUserData(data: EditUser): Promise<void> {
+  public async changeUserData(data: EditUser): Promise<boolean> {
     const user = await this.findOne(data.id);
     user.name = data.name;
     user.email = data.email;
     user.organization = data.organization;
     await this.em.persistAndFlush(user);
+    return true;
   }
 }
