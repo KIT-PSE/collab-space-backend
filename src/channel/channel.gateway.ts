@@ -12,6 +12,9 @@ import { ChannelService } from './channel.service';
 import { Channel } from './channel';
 import * as process from 'process';
 import { BrowserService } from '../browser/browser.service';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const WEB_SOCKET_OPTIONS =
   process.env.NODE_ENV === 'production'
@@ -95,18 +98,19 @@ export class ChannelGateway implements OnGatewayConnection {
   }
 
   private channelState(channel: Channel) {
-    const teacher = {
+    const teacher = channel.teacher && {
       id: channel.teacher.client.id,
       user: channel.teacher.user,
       video: channel.teacher.video,
       audio: channel.teacher.audio,
     };
 
-    const students = channel.students.map((student) => ({
-      id: student.client.id,
+    const students = Array.from(channel.students.values()).map((student) => ({
+      id: student.client?.id,
       name: student.name,
       video: student.video,
       audio: student.audio,
+      handSignal: student.handSignal,
     }));
 
     return {
@@ -191,6 +195,23 @@ export class ChannelGateway implements OnGatewayConnection {
     // await channel.openWebsite(payload.url);
     const peerId = await this.browserService.openBrowser(payload.url);
     this.server.to(channel.id).emit('open-website', peerId);
+
+    return true;
+  }
+
+  @SubscribeMessage('update-handSignal')
+  @UseRequestContext()
+  public async updateHandSignal(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { handSignal: boolean },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.updateHandSignal(client, payload.handSignal);
+
+    this.server.to(channel.id).emit('update-handSignal', {
+      id: client.id,
+      handSignal: payload.handSignal,
+    });
 
     return true;
   }
