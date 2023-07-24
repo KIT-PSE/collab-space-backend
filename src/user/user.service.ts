@@ -58,4 +58,21 @@ export class UserService {
     await this.em.persistAndFlush(user);
     return true;
   }
+
+  public async changeRole(id: number): Promise<User> {
+    const user = await this.repository.findOne({ id });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.role === 'admin') {
+      user.role = 'user';
+    } else if (user.role === 'user') {
+      user.role = 'admin';
+    }
+
+    await this.em.persistAndFlush(user);
+    return user;
+  }
 }

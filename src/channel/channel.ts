@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
@@ -16,27 +15,39 @@ export interface Teacher extends ChannelUser {
 
 export interface Student extends ChannelUser {
   name: string;
+  handSignal: boolean;
 }
 
 export class Channel {
-  public readonly id: string;
   public teacher?: Teacher;
-  public readonly students: Student[] = [];
+  private closeTimeout: NodeJS.Timeout;
 
-  constructor(public readonly room: Room, public readonly server: Server) {
-    // TODO: change id to be a 6 digit random number instead of a UUID to make it easier to type
-    this.id = crypto.randomUUID();
-  }
+  public students: Map<string, Student> = new Map();
+
+  constructor(
+    public readonly room: Room,
+    public readonly server: Server,
+    public readonly id: string,
+  ) {}
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
-    this.students.push({ name, client, video: true, audio: true });
+
+    const student = {
+      name,
+      client,
+      video: true,
+      audio: true,
+      handSignal: false,
+    };
+    this.students.set(client.id, student);
 
     client.broadcast.to(this.id).emit('student-joined', {
       id: client.id,
-      name,
+      name: student.name,
       video: true,
       audio: true,
+      handSignal: false,
     });
   }
 
@@ -64,20 +75,19 @@ export class Channel {
   }
 
   public async leaveAsStudent(client: Socket) {
-    await client.leave(this.id);
-    const index = this.students.findIndex((s) => s.client.id === client.id);
+    const student = this.students.get(client.id);
 
-    if (index < 0) {
-      return;
+    if (student) {
+      delete student.client;
+      this.students.delete(client.id);
+
+      await client.leave(this.id);
+      client.broadcast.to(this.id).emit('student-left', client.id);
     }
-
-    this.students.splice(index, 1);
-
-    client.broadcast.to(this.id).emit('student-left', client.id);
   }
 
   public isEmpty(): boolean {
-    return !this.teacher && this.students.length === 0;
+    return !this.teacher && this.students.size === 0;
   }
 
   public close() {
@@ -89,7 +99,17 @@ export class Channel {
       return this.teacher;
     }
 
-    const student = this.students.find((s) => s.client.id === clientId);
+    const student = this.students.get(clientId);
+
+    if (student) {
+      return student;
+    }
+
+    throw new WsException(`User not found in ${this}`);
+  }
+
+  public getStudent(clientId: string): Student {
+    const student = this.students.get(clientId);
 
     if (student) {
       return student;
@@ -99,7 +119,7 @@ export class Channel {
   }
 
   public changeName(client: Socket, name: string) {
-    const student = this.students.find((s) => s.client.id === client.id);
+    const student = this.students.get(client.id);
 
     if (student) {
       student.name = name;
@@ -115,7 +135,32 @@ export class Channel {
     }
   }
 
+  public updateHandSignal(client: Socket, handSignal: boolean) {
+    const student = this.getStudent(client.id);
+
+    if (student) {
+      student.handSignal = handSignal;
+    }
+  }
+
   public toString(): string {
     return `Channel{${this.id}}`;
+  }
+
+  public clearCloseTimeout() {
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = undefined;
+    }
+  }
+
+  public setCloseTimeout(onTimeout: () => void) {
+    this.clearCloseTimeout();
+    this.closeTimeout = setTimeout(() => {
+      if (this.isEmpty()) {
+        this.close();
+        onTimeout();
+      }
+    }, 1000 * 60 * 10);
   }
 }
