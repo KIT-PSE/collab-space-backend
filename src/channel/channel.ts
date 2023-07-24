@@ -94,7 +94,7 @@ export class Channel {
     return !this.teacher && this.students.size === 0;
   }
 
-  public async close() {
+  public close() {
     this.server.emit('room-closed', this.room.id);
   }
 
