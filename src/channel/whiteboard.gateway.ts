@@ -8,8 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import * as dotenv from 'dotenv';
 import { ChannelService } from './channel.service';
-import { RoomService } from '../room/room.service';
-import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 
 dotenv.config();
 

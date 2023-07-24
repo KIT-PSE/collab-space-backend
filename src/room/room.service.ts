@@ -4,7 +4,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Room } from './room.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
-import * as LZString from 'lz-string';
 
 @Injectable()
 export class RoomService {
