@@ -106,7 +106,11 @@ export class ChannelGateway implements OnGatewayConnection {
     }));
 
     return {
-      room: { ...channel.room, channelId: channel.id },
+      room: {
+        ...channel.room,
+        channelId: channel.id,
+        whiteboardCanvas: channel.canvasJSON,
+      },
       teacher,
       students,
     };

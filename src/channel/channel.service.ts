@@ -5,7 +5,6 @@ import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
-import { fabric } from 'fabric';
 
 @Injectable()
 export class ChannelService {
@@ -35,17 +34,12 @@ export class ChannelService {
       throw new WsException('Room not found');
     }
 
-    const canvas = new fabric.Canvas(null, {
-      width: 2500,
-      height: 2500,
-    });
-
     let channelId;
     do {
       channelId = Math.floor(100000 + Math.random() * 900000).toString();
     } while (this.exists(channelId));
 
-    const channel = new Channel(room, server, channelId, canvas);
+    const channel = new Channel(room, server, channelId);
     await channel.joinAsTeacher(client, user);
     this.channels[channel.id] = channel;
 
@@ -115,7 +109,8 @@ export class ChannelService {
 
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
-      channel.setCloseTimeout(() => {
+      channel.setCloseTimeout(async () => {
+        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
         delete this.channels[channelId];
         this.logger.debug(`Closed ${channel}`);
       });
@@ -147,10 +142,5 @@ export class ChannelService {
         return channel;
       }
     }
-  }
-
-  public getWhiteboardFromRoom(room: Room) {
-    const channel = this.getChannelFromRoom(room);
-    return channel.canvas.toJSON();
   }
 }

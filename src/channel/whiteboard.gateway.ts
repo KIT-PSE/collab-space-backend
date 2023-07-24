@@ -5,11 +5,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import * as LZString from 'lz-string';
 import { Server, Socket } from 'socket.io';
 import * as dotenv from 'dotenv';
 import { ChannelService } from './channel.service';
-import { fabric } from 'fabric';
 import { RoomService } from '../room/room.service';
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 
@@ -25,37 +23,17 @@ export class WhiteboardGateway {
   @WebSocketServer()
   public server: Server;
 
-  constructor(
-    private orm: MikroORM,
-    private channels: ChannelService,
-    private rooms: RoomService,
-  ) {}
+  constructor(private channels: ChannelService) {}
 
   @SubscribeMessage('whiteboard-change')
-  @UseRequestContext()
   public async whiteboardChange(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { path: fabric.Path },
+    @MessageBody() payload: { canvas: string },
   ) {
     const channel = await this.channels.fromClientOrFail(client);
 
+    channel.canvasJSON = payload.canvas;
+
     client.broadcast.to(channel.id).emit('whiteboard-change', payload);
-
-    channel.canvas.add(
-      new fabric.Path(payload.path.path, {
-        ...payload.path,
-      }),
-    );
-
-    const json = channel.canvas.toJSON();
-
-    /*
-      TODO
-      Neue Lösung suchen, aktuelle Lösung nimmt zu viel Speicherplatz in der DB ein
-      übergangsweise Komprimierung mit LZString
-     */
-    const compressed = LZString.compressToUTF16(JSON.stringify(json));
-
-    await this.rooms.updateWhiteboard(channel.room.id, compressed);
   }
 }

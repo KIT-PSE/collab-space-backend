@@ -2,7 +2,6 @@ import { Server, Socket } from 'socket.io';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
 import { WsException } from '@nestjs/websockets';
-import { fabric } from 'fabric';
 
 export interface ChannelUser {
   client: Socket;
@@ -25,12 +24,15 @@ export class Channel {
 
   public students: Map<string, Student> = new Map();
 
+  public canvasJSON: string;
+
   constructor(
     public readonly room: Room,
     public readonly server: Server,
     public readonly id: string,
-    public canvas: fabric.Canvas,
-  ) {}
+  ) {
+    this.canvasJSON = room.whiteboardCanvas;
+  }
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
@@ -92,7 +94,7 @@ export class Channel {
     return !this.teacher && this.students.size === 0;
   }
 
-  public close() {
+  public async close() {
     this.server.emit('room-closed', this.room.id);
   }
 

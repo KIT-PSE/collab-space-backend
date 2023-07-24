@@ -55,13 +55,4 @@ export class RoomController {
     const category = await this.categories.get(categoryId, user);
     return this.rooms.delete(roomId, category);
   }
-
-  @Get('/:room/whiteboard')
-  public async getNotes(
-    @Param('category') categoryId: number,
-    @Param('room') roomId: number,
-  ) {
-    const whiteboard = await this.rooms.getWhiteboard(roomId);
-    return { whiteboard };
-  }
 }

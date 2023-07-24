@@ -53,24 +53,10 @@ export class RoomService {
     await this.em.removeAndFlush(room);
   }
 
-  public async getWhiteboard(id: number): Promise<string> {
+  public async updateWhiteboard(id: number, canvas: string): Promise<Room> {
     const room = await this.repository.findOneOrFail({ id });
 
-    if (
-      !room.whiteboardCanvas ||
-      (room.whiteboardCanvas && !room.whiteboardCanvas.toString())
-    ) {
-      return '';
-    }
-
-    //return room.whiteboardCanvas.toString();
-    return LZString.decompressFromUTF16(room.whiteboardCanvas.toString());
-  }
-
-  public async updateWhiteboard(id: number, whiteboard: string): Promise<Room> {
-    const room = await this.repository.findOneOrFail({ id });
-
-    room.whiteboardCanvas = whiteboard;
+    room.whiteboardCanvas = canvas;
 
     await this.em.persistAndFlush(room);
 
