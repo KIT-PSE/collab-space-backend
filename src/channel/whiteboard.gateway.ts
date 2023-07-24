@@ -48,19 +48,12 @@ export class WhiteboardGateway {
     );
 
     const json = channel.canvas.toJSON();
-    /*const copy = { ...json, objects: [] };
 
-    (json.objects || []).map((object) => {
-      const objectCopy = {};
-      for (const key in object) {
-        const val = object[key];
-        if (val !== null && val !== 0) {
-          objectCopy[key] = object[key];
-        }
-      }
-      copy.objects.push(objectCopy);
-    });*/
-
+    /*
+      TODO
+      Neue Lösung suchen, aktuelle Lösung nimmt zu viel Speicherplatz in der DB ein
+      übergangsweise Komprimierung mit LZString
+     */
     const compressed = LZString.compressToUTF16(JSON.stringify(json));
 
     await this.rooms.updateWhiteboard(channel.room.id, compressed);
