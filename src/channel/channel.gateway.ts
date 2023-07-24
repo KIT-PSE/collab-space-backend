@@ -191,7 +191,6 @@ export class ChannelGateway implements OnGatewayConnection {
     this.server.to(channel.id).emit('update-handSignal', {
       id: client.id,
       handSignal: payload.handSignal,
-
     });
 
     return true;

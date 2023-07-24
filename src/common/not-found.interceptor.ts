@@ -1,6 +1,12 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, NotFoundException } from "@nestjs/common";
-import { catchError, Observable } from "rxjs";
-import { NotFoundError } from "@mikro-orm/core";
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  NotFoundException,
+} from '@nestjs/common';
+import { catchError, Observable } from 'rxjs';
+import { NotFoundError } from '@mikro-orm/core';
 
 /*
  * This interceptor catches any NotFoundError thrown by MikroORM and
