@@ -50,9 +50,12 @@ export class NotesGateway {
     @MessageBody() payload: { noteId: number; content: string },
   ) {
     const channel = this.channels.fromClientOrFail(client);
-    const note = await this.notes.updateNote(payload.noteId, payload.content);
+    await this.notes.updateNote(payload.noteId, payload.content);
 
-    client.broadcast.to(channel.id).emit('note-updated', note);
+    client.broadcast.to(channel.id).emit('note-updated', {
+      noteId: payload.noteId,
+      content: payload.content,
+    });
 
     return true;
   }
