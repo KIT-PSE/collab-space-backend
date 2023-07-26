@@ -27,7 +27,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Put('changeOrg')
+  @Put('changeUserData')
   public async changeUserData(@Body() data: EditUser): Promise<boolean> {
     return this.userService.changeUserData(data);
   }
