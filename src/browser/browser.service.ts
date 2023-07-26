@@ -5,10 +5,10 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 export class BrowserService implements OnModuleDestroy {
   public browser: Browser | null;
 
-  public async openBrowser(url: string): Promise<void> {
+  public async openBrowser(url: string): Promise<string> {
     this.browser = new Browser(url);
 
-    await this.browser.open();
+    return await this.browser.open();
   }
 
   public async close(): Promise<void> {

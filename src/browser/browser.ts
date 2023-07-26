@@ -1,10 +1,11 @@
 import puppeteer, { Browser as PuppeteerBrowser, Page } from 'puppeteer';
 import { Logger } from '@nestjs/common';
 import * as path from 'path';
+import * as process from 'process';
 
 const LOGGER = new Logger('Browser');
 
-const PATH_TO_EXTENSION = path.join(process.cwd(), 'extension');
+const PATH_TO_EXTENSION = path.join(process.cwd(), 'browser-extension');
 const EXTENSION_ID = 'jjndjgheafjngoipoacpjgeicjeomjli';
 
 export class Browser {
@@ -13,8 +14,10 @@ export class Browser {
 
   constructor(public readonly url: string) {}
 
-  public async open(): Promise<any> {
+  public async open(): Promise<string> {
     const args = [];
+
+    console.info(PATH_TO_EXTENSION);
 
     if (process.env.NODE_ENV === 'development') {
       args.push('--no-sandbox');
@@ -45,11 +48,14 @@ export class Browser {
 
     await this.page.bringToFront();
 
-    const id = await this.page.evaluate(async () => {
+    const id = await extensionPage.evaluate(async () => {
+      console.log('hello world');
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return await START_RECORDING();
     });
+
+    LOGGER.debug(`Recording started with id: ${id}`);
 
     return id;
   }

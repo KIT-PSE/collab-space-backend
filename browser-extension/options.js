@@ -7,8 +7,11 @@ async function START_RECORDING() {
 
   const stream = await new Promise((resolve, reject) => {
     chrome.tabCapture.capture({ video: true }, (stream) => {
-      if (stream) resolve(stream);
-      else reject();
+      if (stream) {
+        resolve(stream);
+      } else {
+        reject();
+      }
     });
   });
 
@@ -21,8 +24,11 @@ async function START_RECORDING() {
 
     peer.on('open', (id) => {
       resolve(id);
+      console.log('open peer:', id);
 
       peer.on('connection', (conn) => {
+        console.log('established connection:', conn);
+
         conn.on('open', () => {
           console.log('connected: ' + conn.peer);
           conn.send('hello from the server');
