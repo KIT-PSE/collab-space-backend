@@ -212,8 +212,6 @@ export class ChannelGateway implements OnGatewayConnection {
 
     });
 
-    console.log(1)
-
     return true;
   }
 
