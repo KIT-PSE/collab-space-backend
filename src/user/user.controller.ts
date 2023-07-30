@@ -20,7 +20,13 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Post('changePassword')
-  public async changePassword(@Body() data: { id: number, currentPassword: string, newPassword: string }) {
-    await this.userService.changePassword(data.id, data.currentPassword, data.newPassword);
+  public async changePassword(
+    @Body() data: { id: number; currentPassword: string; newPassword: string },
+  ) {
+    await this.userService.changePassword(
+      data.id,
+      data.currentPassword,
+      data.newPassword,
+    );
   }
 }

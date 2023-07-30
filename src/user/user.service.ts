@@ -46,9 +46,9 @@ export class UserService {
   }
 
   public async changePassword(
-      userId: number,
-      currentPassword: string,
-      newPassword: string,
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
   ): Promise<void> {
     const user = await this.repository.findOne({ id: userId });
 
@@ -58,8 +58,8 @@ export class UserService {
 
     // Überprüfe das aktuelle Passwort
     const isCurrentPasswordValid = await bcrypt.compare(
-        currentPassword,
-        user.password,
+      currentPassword,
+      user.password,
     );
 
     if (!isCurrentPasswordValid) {
@@ -68,8 +68,8 @@ export class UserService {
 
     // Generiere das Hash für das neue Passwort
     const newHashedPassword = await bcrypt.hash(
-        newPassword,
-        UserService.SALT_OR_ROUNDS,
+      newPassword,
+      UserService.SALT_OR_ROUNDS,
     );
 
     // Speichere das neue Passwort in der Datenbank
