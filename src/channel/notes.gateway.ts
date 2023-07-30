@@ -59,4 +59,20 @@ export class NotesGateway {
 
     return true;
   }
+
+  @SubscribeMessage('delete-note')
+  @UseRequestContext()
+  public async deleteNote(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { noteId: number },
+  ) {
+    const channel = this.channels.fromClientOrFail(client);
+    await this.notes.deleteNoteById(payload.noteId);
+
+    this.server.to(channel.id).emit('note-deleted', {
+      noteId: payload.noteId,
+    });
+
+    return true;
+  }
 }

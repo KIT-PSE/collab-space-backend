@@ -28,8 +28,9 @@ export class NoteService {
     return note;
   }
 
-  public async getNotes(roomId: number) {
-    const room = await this.roomService.findOneWithCategory(roomId);
-    return await this.repository.find({ room });
+  public async deleteNoteById(id: number) {
+    const note = await this.repository.findOneOrFail({ id });
+    await this.em.removeAndFlush(note);
+    return true;
   }
 }
