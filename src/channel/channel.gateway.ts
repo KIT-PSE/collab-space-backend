@@ -201,7 +201,7 @@ export class ChannelGateway implements OnGatewayConnection {
   @UseRequestContext()
   public async updatePermission(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { studentId: string, permission: boolean },
+    @MessageBody() payload: { studentId: string; permission: boolean },
   ) {
     const channel = await this.channels.fromClientOrFail(client);
     channel.updatePermission(payload.studentId, payload.permission);
@@ -209,7 +209,6 @@ export class ChannelGateway implements OnGatewayConnection {
     this.server.to(channel.id).emit('update-permission', {
       id: payload.studentId,
       permission: payload.permission,
-
     });
 
     return true;
