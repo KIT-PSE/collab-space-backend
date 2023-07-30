@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
+import { BrowserService } from '../browser/browser.service';
 
 @Injectable()
 export class ChannelService {
@@ -14,6 +15,7 @@ export class ChannelService {
   constructor(
     private readonly rooms: RoomService,
     private readonly users: UserService,
+    private readonly browsers: BrowserService,
   ) {}
 
   public async open(
@@ -116,8 +118,9 @@ export class ChannelService {
      */
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
-      channel.setCloseTimeout(() => {
+      channel.setCloseTimeout(async () => {
         delete this.channels[channelId];
+        await this.browsers.closeBrowserContext(channelId);
         this.logger.debug(`Closed ${channel}`);
       });
     }

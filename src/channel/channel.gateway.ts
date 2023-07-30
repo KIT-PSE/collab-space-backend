@@ -11,8 +11,8 @@ import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel';
 import * as process from 'process';
-import { BrowserService } from '../browser/browser.service';
 import * as dotenv from 'dotenv';
+import { BrowserService } from '../browser/browser.service';
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ export class ChannelGateway implements OnGatewayConnection {
   constructor(
     private orm: MikroORM,
     private channels: ChannelService,
-    private browserService: BrowserService,
+    private browsers: BrowserService,
   ) {}
 
   // todo: add authentication - only a logged in teacher should be able to open a room
@@ -113,8 +113,11 @@ export class ChannelGateway implements OnGatewayConnection {
       handSignal: student.handSignal,
     }));
 
+    const browserPeerId = this.browsers.getPeerId(channel.id);
+
     return {
       room: channel.room,
+      browserPeerId: browserPeerId || '',
       teacher,
       students,
     };
@@ -181,20 +184,6 @@ export class ChannelGateway implements OnGatewayConnection {
       video: payload.video,
       audio: payload.audio,
     });
-
-    return true;
-  }
-
-  @SubscribeMessage('open-website')
-  @UseRequestContext()
-  public async openWebsite(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { url: string },
-  ) {
-    const channel = await this.channels.fromClientOrFail(client);
-    // await channel.openWebsite(payload.url);
-    const peerId = await this.browserService.openBrowser(payload.url);
-    this.server.to(channel.id).emit('open-website', peerId);
 
     return true;
   }
