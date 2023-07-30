@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Note } from './note.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
-import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
 
 @Injectable()
