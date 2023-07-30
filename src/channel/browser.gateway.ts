@@ -1,7 +1,6 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -9,7 +8,6 @@ import {
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
-import { Channel } from './channel';
 import * as process from 'process';
 import { BrowserService } from '../browser/browser.service';
 import * as dotenv from 'dotenv';
