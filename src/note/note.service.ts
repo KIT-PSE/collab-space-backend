@@ -12,7 +12,6 @@ export class NoteService {
     private readonly em: EntityManager,
     @InjectRepository(Note)
     private readonly repository: EntityRepository<Note>,
-    private readonly roomService: RoomService,
   ) {}
 
   public async addNote(room: Room, name: string) {
