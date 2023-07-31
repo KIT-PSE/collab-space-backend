@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -12,6 +12,7 @@ export class ChannelService {
   private readonly channels: { [key: string]: Channel } = {};
 
   constructor(
+    @Inject(forwardRef(() => RoomService))
     private readonly rooms: RoomService,
     private readonly users: UserService,
   ) {}
@@ -110,10 +111,21 @@ export class ChannelService {
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
       channel.setCloseTimeout(() => {
-        delete this.channels[channelId];
-        this.logger.debug(`Closed ${channel}`);
+        this.close(channelId);
       });
     }
+  }
+
+  public async close(channelId: string) {
+    const channel = this.channels[channelId];
+
+    if (!channel) {
+      throw new WsException('Channel not found');
+    }
+
+    await channel.close();
+    delete this.channels[channelId];
+    this.logger.debug(`Closed ${channel}`);
   }
 
   public fromClientOrFail(client: Socket): Channel {

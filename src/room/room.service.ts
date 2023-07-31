@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Room } from './room.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
+import { ChannelService } from '../channel/channel.service';
 
 @Injectable()
 export class RoomService {
@@ -11,6 +12,8 @@ export class RoomService {
     private readonly em: EntityManager,
     @InjectRepository(Room)
     private readonly repository: EntityRepository<Room>,
+    @Inject(forwardRef(() => ChannelService))
+    private readonly channels: ChannelService,
   ) {}
 
   public async get(id: number, category: Category): Promise<Room> {
@@ -48,6 +51,9 @@ export class RoomService {
 
   public async delete(id: number, category: Category): Promise<void> {
     const room = await this.get(id, category);
+
+    const channel = this.channels.getChannelFromRoom(room);
+    await this.channels.close(channel.id);
 
     await this.em.removeAndFlush(room);
   }
