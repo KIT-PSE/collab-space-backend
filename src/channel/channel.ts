@@ -32,7 +32,7 @@ export class Channel {
     public readonly server: Server,
     public readonly id: string,
   ) {
-    this.canvasJSON = room.whiteboardCanvas;
+    this.canvasJSON = room.whiteboardCanvas?.toString();
   }
 
   public async joinAsStudent(client: Socket, name: string) {
