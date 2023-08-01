@@ -1,8 +1,16 @@
-import { Body, Controller, Delete, Get, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
-import { Response } from "express";
 
 export type EditUser = {
   id: number;
@@ -34,13 +42,9 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard, AdminGuard)
-  @Delete('delete')
-  public async delete(
-    @Res({ passthrough: true }) response: Response,
-    @Body() data: { id: number },
-  ) {
-    await this.userService.delete(data.id);
-    response.clearCookie('jwt');
+  @Delete('/:userId/delete')
+  public async delete(@Param('userId') userId: number) {
+    await this.userService.delete(userId);
 
     return { message: 'success' };
   }
