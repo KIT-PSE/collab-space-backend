@@ -17,17 +17,8 @@ export class BrowserService implements OnModuleDestroy {
   private async openBrowser() {
     const args = [];
 
-    if (process.env.NODE_ENV === 'development') {
-      args.push('--no-sandbox');
-      args.push('--disable-setuid-sandbox');
-      /**
-       * Do not set the port if multiple browser instances are used.
-       * Otherwise, a second browser instance cannot be started.
-       */
-      /*args.push('--remote-debugging-port=9222');
-      args.push('--remote-debugging-address=0.0.0.0');*/
-    }
-
+    args.push('--no-sandbox');
+    args.push('--disable-setuid-sandbox');
     args.push(`--load-extension=${PATH_TO_EXTENSION}`);
     args.push(`--disable-extensions-except=${PATH_TO_EXTENSION}`);
     args.push(`--allowlisted-extension-id=${EXTENSION_ID}`);
