@@ -29,7 +29,7 @@ export class Room {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Property()
+  @Property({ persist: false })
   channelId?: string;
 
   @OneToMany(() => Note, (note) => note.room)
