@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
+  types,
 } from '@mikro-orm/core';
 import { Category } from '../category/category.entity';
 import { Note } from '../note/note.entity';
@@ -34,6 +35,9 @@ export class Room {
 
   @OneToMany(() => Note, (note) => note.room)
   notes = new Collection<Note>(this);
+
+  @Property({ type: types.blob, nullable: true })
+  whiteboardCanvas?;
 
   constructor(name: string, category: Category, password?: string) {
     this.name = name;
