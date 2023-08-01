@@ -1,4 +1,10 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  types,
+} from '@mikro-orm/core';
 import { Category } from '../category/category.entity';
 
 @Entity({ tableName: 'rooms' })
@@ -23,6 +29,9 @@ export class Room {
 
   @Property()
   channelId?: string;
+
+  @Property({ type: types.blob, nullable: true })
+  whiteboardCanvas?;
 
   constructor(name: string, category: Category, password?: string) {
     this.name = name;

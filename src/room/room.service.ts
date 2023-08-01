@@ -51,4 +51,14 @@ export class RoomService {
 
     await this.em.removeAndFlush(room);
   }
+
+  public async updateWhiteboard(id: number, canvas: string): Promise<Room> {
+    const room = await this.repository.findOneOrFail({ id });
+
+    room.whiteboardCanvas = canvas;
+
+    await this.em.persistAndFlush(room);
+
+    return room;
+  }
 }

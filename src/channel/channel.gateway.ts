@@ -40,9 +40,7 @@ export class ChannelGateway implements OnGatewayConnection {
       payload.roomId,
     );
 
-    return {
-      id: channel.id,
-    };
+    return this.channelState(channel);
   }
 
   @SubscribeMessage('join-room-as-student')
@@ -109,7 +107,11 @@ export class ChannelGateway implements OnGatewayConnection {
     }));
 
     return {
-      room: channel.room,
+      room: {
+        ...channel.room,
+        channelId: channel.id,
+        whiteboardCanvas: channel.canvasJSON,
+      },
       teacher,
       students,
     };
