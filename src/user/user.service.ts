@@ -56,7 +56,6 @@ export class UserService {
       throw new Error('Benutzer nicht gefunden.');
     }
 
-    // Überprüfe das aktuelle Passwort
     const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password,
@@ -66,14 +65,8 @@ export class UserService {
       throw new Error('Falsches aktuelles Passwort.');
     }
 
-    // Generiere das Hash für das neue Passwort
-    const newHashedPassword = await bcrypt.hash(
-      newPassword,
-      UserService.SALT_OR_ROUNDS,
-    );
+    user.password = await bcrypt.hash(newPassword, UserService.SALT_OR_ROUNDS);
 
-    // Speichere das neue Passwort in der Datenbank
-    user.password = newHashedPassword;
     await this.em.persistAndFlush(user);
   }
 
