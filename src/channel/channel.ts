@@ -25,11 +25,15 @@ export class Channel {
 
   public students: Map<string, Student> = new Map();
 
+  public canvasJSON: string;
+
   constructor(
     public readonly room: Room,
     public readonly server: Server,
     public readonly id: string,
-  ) {}
+  ) {
+    this.canvasJSON = room.whiteboardCanvas?.toString();
+  }
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
