@@ -24,7 +24,7 @@ export class Note {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @ManyToOne({ onDelete: 'cascade' })
+  @ManyToOne({ onDelete: 'cascade', hidden: true })
   room: Room;
 
   constructor(name: string, room: Room) {
