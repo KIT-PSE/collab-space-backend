@@ -3,7 +3,7 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20230720201145 extends Migration {
 
   async up(): Promise<void> {
-    this.addSql('alter table `rooms` modify `whiteboard_canvas` blob;');
+    this.addSql('alter table `rooms` modify `whiteboard_canvas` longblob;');
   }
 
   async down(): Promise<void> {
