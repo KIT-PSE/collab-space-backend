@@ -103,6 +103,7 @@ export class ChannelGateway implements OnGatewayConnection {
       video: student.video,
       audio: student.audio,
       handSignal: student.handSignal,
+      permission: student.permission,
     }));
 
     return {
@@ -193,6 +194,23 @@ export class ChannelGateway implements OnGatewayConnection {
     this.server.to(channel.id).emit('update-handSignal', {
       id: client.id,
       handSignal: payload.handSignal,
+    });
+
+    return true;
+  }
+
+  @SubscribeMessage('update-permission')
+  @UseRequestContext()
+  public async updatePermission(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { studentId: string; permission: boolean },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.updatePermission(payload.studentId, payload.permission);
+
+    this.server.to(channel.id).emit('update-permission', {
+      id: payload.studentId,
+      permission: payload.permission,
     });
 
     return true;

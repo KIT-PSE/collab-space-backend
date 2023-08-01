@@ -16,6 +16,7 @@ export interface Teacher extends ChannelUser {
 export interface Student extends ChannelUser {
   name: string;
   handSignal: boolean;
+  permission: boolean;
 }
 
 export class Channel {
@@ -43,6 +44,7 @@ export class Channel {
       video: true,
       audio: true,
       handSignal: false,
+      permission: false,
     };
     this.students.set(client.id, student);
 
@@ -144,6 +146,14 @@ export class Channel {
 
     if (student) {
       student.handSignal = handSignal;
+    }
+  }
+
+  public updatePermission(studentId: string, permission: boolean) {
+    const student = this.getStudent(studentId);
+
+    if (student) {
+      student.permission = permission;
     }
   }
 
