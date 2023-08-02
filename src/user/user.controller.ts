@@ -2,10 +2,14 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
   @UseGuards(AuthGuard, AdminGuard)
   @Get('findAll')
   public async findAll() {
@@ -21,10 +25,12 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Post('changePassword')
   public async changePassword(
-    @Body() data: { id: number; currentPassword: string; newPassword: string },
+    @Body() data: { currentPassword: string; newPassword: string },
   ) {
+    const user = await this.authService.user();
+
     await this.userService.changePassword(
-      data.id,
+      user,
       data.currentPassword,
       data.newPassword,
     );

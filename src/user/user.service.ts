@@ -46,16 +46,10 @@ export class UserService {
   }
 
   public async changePassword(
-    userId: number,
+    user: User,
     currentPassword: string,
     newPassword: string,
   ): Promise<void> {
-    const user = await this.repository.findOne({ id: userId });
-
-    if (!user) {
-      throw new Error('Benutzer nicht gefunden.');
-    }
-
     const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password,
