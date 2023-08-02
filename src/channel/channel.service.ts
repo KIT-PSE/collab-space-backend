@@ -58,11 +58,16 @@ export class ChannelService {
     client: Socket,
     channelId: string,
     name: string,
+    password?: string,
   ): Promise<Channel> {
     const channel = this.channels[channelId];
 
     if (!channel) {
       throw new WsException('Channel not found');
+    }
+
+    if (channel.room.password && channel.room.password !== password) {
+      throw new WsException('Wrong password');
     }
 
     await channel.joinAsStudent(client, name);
@@ -120,6 +125,7 @@ export class ChannelService {
       channel.clearCloseTimeout();
       channel.setCloseTimeout(async () => {
         delete this.channels[channelId];
+        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
         await this.browsers.closeBrowserContext(channelId);
         this.logger.debug(`Closed ${channel}`);
       });

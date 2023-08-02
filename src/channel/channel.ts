@@ -16,6 +16,7 @@ export interface Teacher extends ChannelUser {
 export interface Student extends ChannelUser {
   name: string;
   handSignal: boolean;
+  permission: boolean;
 }
 
 export class Channel {
@@ -24,11 +25,15 @@ export class Channel {
 
   public students: Map<string, Student> = new Map();
 
+  public canvasJSON: string;
+
   constructor(
     public readonly room: Room,
     public readonly server: Server,
     public readonly id: string,
-  ) {}
+  ) {
+    this.canvasJSON = room.whiteboardCanvas?.toString();
+  }
 
   public async joinAsStudent(client: Socket, name: string) {
     await client.join(this.id);
@@ -39,6 +44,7 @@ export class Channel {
       video: true,
       audio: true,
       handSignal: false,
+      permission: false,
     };
     this.students.set(client.id, student);
 
@@ -140,6 +146,14 @@ export class Channel {
 
     if (student) {
       student.handSignal = handSignal;
+    }
+  }
+
+  public updatePermission(studentId: string, permission: boolean) {
+    const student = this.getStudent(studentId);
+
+    if (student) {
+      student.permission = permission;
     }
   }
 
