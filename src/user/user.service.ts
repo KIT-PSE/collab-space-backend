@@ -46,6 +46,11 @@ export class UserService {
     return user;
   }
 
+  public async changePassword(user: User, password: string): Promise<void> {
+    user.password = await bcrypt.hash(password, UserService.SALT_OR_ROUNDS);
+    await this.em.persistAndFlush(user);
+  }
+
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
   }
