@@ -35,7 +35,7 @@ export class RegisterUser {
   password: string;
 
   @IsNotEmpty({
-    message: 'Passwort darf nicht leer sein',
+    message: 'Passwörter müssen übereinstimmen',
   })
   @Match('password', {
     message: 'Passwörter müssen übereinstimmen',
@@ -58,6 +58,29 @@ export class LoginUser {
     message: 'Passwort darf nicht leer sein',
   })
   password: string;
+}
+
+export class ChangePassword {
+  @IsNotEmpty({
+    message: 'Bitte gib dein aktuelles Passwort ein',
+  })
+  currentPassword: string;
+
+  @IsNotEmpty({
+    message: 'Das neue Passwort darf nicht leer sein',
+  })
+  @MinLength(8, {
+    message: 'Passwort muss mindestens 8 Zeichen lang sein',
+  })
+  newPassword: string;
+
+  @IsNotEmpty({
+    message: 'Passwörter müssen übereinstimmen',
+  })
+  @Match('newPassword', {
+    message: 'Passwörter müssen übereinstimmen',
+  })
+  confirmNewPassword: string;
 }
 
 export interface AuthPayload {
