@@ -1,8 +1,15 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
 import { AuthService } from '../auth/auth.service';
+
+export type EditUser = {
+  id: number;
+  organization: string;
+  name: string;
+  email: string;
+};
 
 @Controller('user')
 export class UserController {
@@ -20,6 +27,12 @@ export class UserController {
   @Post('changeRole')
   public async changeRole(@Body() data: { id: number }) {
     return await this.userService.changeRole(data.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('changeUserData')
+  public async changeUserData(@Body() data: EditUser): Promise<boolean> {
+    return this.userService.changeUserData(data);
   }
 
   @UseGuards(AuthGuard)

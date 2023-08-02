@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { CreateUser } from '../auth/auth.dto';
 import * as bcrypt from 'bcrypt';
+import { EditUser } from './user.controller';
 
 @Injectable()
 export class UserService {
@@ -66,6 +67,15 @@ export class UserService {
 
   public async delete(id: number): Promise<void> {
     await this.repository.nativeDelete({ id });
+  }
+
+  public async changeUserData(data: EditUser): Promise<boolean> {
+    const user = await this.findOne(data.id);
+    user.name = data.name;
+    user.email = data.email;
+    user.organization = data.organization;
+    await this.em.persistAndFlush(user);
+    return true;
   }
 
   public async changeRole(id: number): Promise<User> {

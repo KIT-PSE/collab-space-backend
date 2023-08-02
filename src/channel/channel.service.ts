@@ -109,7 +109,8 @@ export class ChannelService {
 
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
-      channel.setCloseTimeout(() => {
+      channel.setCloseTimeout(async () => {
+        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
         delete this.channels[channelId];
         this.logger.debug(`Closed ${channel}`);
       });
