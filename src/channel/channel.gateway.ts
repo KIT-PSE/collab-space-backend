@@ -51,17 +51,24 @@ export class ChannelGateway implements OnGatewayConnection {
     payload: {
       name: string;
       channelId: string;
+      password?: string;
     },
   ) {
     if (!this.channels.exists(payload.channelId)) {
       return { error: 'Der Raum konnte nicht gefunden werden' };
     }
 
-    const channel = await this.channels.joinAsStudent(
-      client,
-      payload.channelId,
-      payload.name,
-    );
+    let channel;
+    try {
+      channel = await this.channels.joinAsStudent(
+        client,
+        payload.channelId,
+        payload.name,
+        payload.password,
+      );
+    } catch (e) {
+      return { error: e.message };
+    }
 
     return this.channelState(channel);
   }
