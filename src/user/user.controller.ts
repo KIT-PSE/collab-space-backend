@@ -6,11 +6,15 @@ import {
   Param,
   Post,
   Put,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
+import { AuthService } from '../auth/auth.service';
+import { ChangePassword } from '../auth/auth.dto';
+import * as bcrypt from 'bcrypt';
 
 export type EditUser = {
   id: number;
@@ -21,7 +25,10 @@ export type EditUser = {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @UseGuards(AuthGuard, AdminGuard)
   @Get('findAll')
@@ -47,5 +54,26 @@ export class UserController {
     await this.userService.delete(userId);
 
     return { message: 'success' };
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('changePassword')
+  public async changePassword(@Body() data: ChangePassword) {
+    const user = await this.authService.user();
+
+    const passwordValid = await bcrypt.compare(
+      data.currentPassword,
+      user.password,
+    );
+
+    if (!passwordValid) {
+      throw new UnprocessableEntityException([
+        ['currentPassword', 'Das aktuelle Passwort ist falsch'],
+      ]);
+    }
+
+    await this.userService.changePassword(user, data.newPassword);
+
+    return true;
   }
 }
