@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { User } from './user.entity';
@@ -50,19 +50,31 @@ export class UserService {
     user: User,
     currentPassword: string,
     newPassword: string,
-  ): Promise<void> {
+  ) {
+    if (!currentPassword) {
+      throw new ForbiddenException('Aktuelles Passwort fehlt.', {
+        description: 'test',
+      });
+    }
+    if (!newPassword) {
+      throw new ForbiddenException('Neues Passwort fehlt.');
+    }
+
     const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password,
     );
 
     if (!isCurrentPasswordValid) {
-      throw new Error('Falsches aktuelles Passwort.');
+      throw new ForbiddenException('Falsches aktuelles Passwort.', {
+        description: 'test2',
+      });
     }
 
     user.password = await bcrypt.hash(newPassword, UserService.SALT_OR_ROUNDS);
 
     await this.em.persistAndFlush(user);
+    return true;
   }
 
   public async delete(id: number): Promise<void> {

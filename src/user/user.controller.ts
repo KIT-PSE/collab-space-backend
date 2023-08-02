@@ -42,7 +42,7 @@ export class UserController {
   ) {
     const user = await this.authService.user();
 
-    await this.userService.changePassword(
+    return this.userService.changePassword(
       user,
       data.currentPassword,
       data.newPassword,
