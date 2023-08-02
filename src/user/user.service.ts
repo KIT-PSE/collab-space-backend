@@ -52,9 +52,7 @@ export class UserService {
     newPassword: string,
   ) {
     if (!currentPassword) {
-      throw new ForbiddenException('Aktuelles Passwort fehlt.', {
-        description: 'test',
-      });
+      throw new ForbiddenException('Aktuelles Passwort fehlt.');
     }
     if (!newPassword) {
       throw new ForbiddenException('Neues Passwort fehlt.');
@@ -66,9 +64,7 @@ export class UserService {
     );
 
     if (!isCurrentPasswordValid) {
-      throw new ForbiddenException('Falsches aktuelles Passwort.', {
-        description: 'test2',
-      });
+      throw new ForbiddenException('Falsches aktuelles Passwort.');
     }
 
     user.password = await bcrypt.hash(newPassword, UserService.SALT_OR_ROUNDS);
