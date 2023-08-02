@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
   UnprocessableEntityException,
@@ -44,6 +46,14 @@ export class UserController {
   @Put('changeUserData')
   public async changeUserData(@Body() data: EditUser): Promise<boolean> {
     return this.userService.changeUserData(data);
+  }
+
+  @UseGuards(AuthGuard, AdminGuard)
+  @Delete('/:userId')
+  public async delete(@Param('userId') userId: number) {
+    await this.userService.delete(userId);
+
+    return { message: 'success' };
   }
 
   @UseGuards(AuthGuard)

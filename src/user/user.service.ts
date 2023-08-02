@@ -52,6 +52,11 @@ export class UserService {
   }
 
   public async delete(id: number): Promise<void> {
+    const user = await this.repository.findOne({ id });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
     await this.repository.nativeDelete({ id });
   }
 
