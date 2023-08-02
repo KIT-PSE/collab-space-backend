@@ -56,11 +56,16 @@ export class ChannelService {
     client: Socket,
     channelId: string,
     name: string,
+    password?: string,
   ): Promise<Channel> {
     const channel = this.channels[channelId];
 
     if (!channel) {
       throw new WsException('Channel not found');
+    }
+
+    if (channel.room.password && channel.room.password !== password) {
+      throw new WsException('Wrong password');
     }
 
     await channel.joinAsStudent(client, name);
