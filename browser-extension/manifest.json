@@ -1,0 +1,33 @@
+{
+  "name": "Video Capture",
+  "version": "0.1.0",
+  "key": "ackedhmjjinfocdcekpnbdocpmiffaac",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "sockets": {
+    "udp": {
+      "send": [
+        "*:*"
+      ],
+      "bind": [
+        "*:*"
+      ]
+    }
+  },
+  "permissions": [
+    "tabs",
+    "tabCapture",
+    "storage",
+    "activeTab",
+    "scripting",
+    "sockets.udp"
+  ],
+  "host_permissions": [
+    "*://*/*",
+    "<all_urls>",
+    "https://*/*",
+    "http://*/*"
+  ]
+}

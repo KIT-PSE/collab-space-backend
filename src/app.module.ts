@@ -8,6 +8,7 @@ import { CategoryModule } from './category/category.module';
 import { RoomModule } from './room/room.module';
 import { ExistsConstraint } from './common/constraints/exists';
 import { ChannelModule } from './channel/channel.module';
+import { BrowserModule } from './browser/browser.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ChannelModule } from './channel/channel.module';
     CategoryModule,
     RoomModule,
     ChannelModule,
+    BrowserModule,
   ],
   providers: [IsUniqueConstraint, ExistsConstraint],
 })

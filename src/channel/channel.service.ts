@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
+import { BrowserService } from '../browser/browser.service';
 
 @Injectable()
 export class ChannelService {
@@ -14,6 +15,7 @@ export class ChannelService {
   constructor(
     private readonly rooms: RoomService,
     private readonly users: UserService,
+    private readonly browsers: BrowserService,
   ) {}
 
   public async open(
@@ -112,11 +114,19 @@ export class ChannelService {
       this.logger.debug(`Left ${channel} as student ${client.id}`);
     }
 
+    /*
+     * If the channel is empty after the client left, close it after 1 second.
+     * This is a temporary solution to prevent the channel from being
+     * closed when the teacher leaves and rejoins.
+     *
+     * TODO: implement a better solution
+     */
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
       channel.setCloseTimeout(async () => {
-        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
         delete this.channels[channelId];
+        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
+        await this.browsers.closeBrowserContext(channelId);
         this.logger.debug(`Closed ${channel}`);
       });
     }

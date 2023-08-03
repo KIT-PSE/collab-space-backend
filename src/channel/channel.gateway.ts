@@ -10,7 +10,9 @@ import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel';
+import * as process from 'process';
 import * as dotenv from 'dotenv';
+import { BrowserService } from '../browser/browser.service';
 
 dotenv.config();
 
@@ -24,7 +26,11 @@ export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
   public server: Server;
 
-  constructor(private orm: MikroORM, private channels: ChannelService) {}
+  constructor(
+    private orm: MikroORM,
+    private channels: ChannelService,
+    private browsers: BrowserService,
+  ) {}
 
   // todo: add authentication - only a logged in teacher should be able to open a room
   @SubscribeMessage('open-room')
@@ -113,7 +119,10 @@ export class ChannelGateway implements OnGatewayConnection {
       permission: student.permission,
     }));
 
+    const browserPeerId = this.browsers.getPeerId(channel.id);
+
     return {
+      browserPeerId: browserPeerId || '',
       room: {
         ...channel.room,
         category: channel.room.category.id,

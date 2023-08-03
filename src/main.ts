@@ -23,6 +23,7 @@ async function bootstrap() {
   app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
   app.useGlobalPipes(new ValidationPipe({ exceptionFactory }));
   app.useGlobalInterceptors(new NotFoundInterceptor());
+  app.enableShutdownHooks();
 
   // allows us to use NestJS DI in class-validator custom decorators
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
