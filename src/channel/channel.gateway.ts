@@ -125,6 +125,7 @@ export class ChannelGateway implements OnGatewayConnection {
       browserPeerId: browserPeerId || '',
       room: {
         ...channel.room,
+        category: channel.room.category.id,
         channelId: channel.id,
         whiteboardCanvas: channel.canvasJSON,
       },
