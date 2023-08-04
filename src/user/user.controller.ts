@@ -16,6 +16,9 @@ import { AuthService } from '../auth/auth.service';
 import { ChangePassword } from '../auth/auth.dto';
 import * as bcrypt from 'bcrypt';
 
+/**
+ * Interface representing user data for editing.
+ */
 export type EditUser = {
   id: number;
   organization: string;
@@ -23,6 +26,9 @@ export type EditUser = {
   email: string;
 };
 
+/**
+ * Controller managing user-related routes and operations.
+ */
 @Controller('user')
 export class UserController {
   constructor(
@@ -30,24 +36,43 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
 
+  /**
+   * Retrieve a list of all users.
+   * Requires authentication and admin privilege.
+   */
   @UseGuards(AuthGuard, AdminGuard)
   @Get('findAll')
   public async findAll() {
     return await this.userService.findAll();
   }
 
+  /**
+   * Change the role of a user.
+   * Requires authentication and admin privilege.
+   * @param data - Object containing the ID of the user.
+   */
   @UseGuards(AuthGuard, AdminGuard)
   @Post('changeRole')
   public async changeRole(@Body() data: { id: number }) {
     return await this.userService.changeRole(data.id);
   }
 
+  /**
+   * Update user data.
+   * Requires authentication.
+   * @param data - Object containing updated user data.
+   */
   @UseGuards(AuthGuard)
   @Put('changeUserData')
   public async changeUserData(@Body() data: EditUser): Promise<boolean> {
     return this.userService.changeUserData(data);
   }
 
+  /**
+   * Delete a user by ID.
+   * Requires authentication and admin privilege.
+   * @param userId - ID of the user to delete.
+   */
   @UseGuards(AuthGuard, AdminGuard)
   @Delete('/:userId')
   public async delete(@Param('userId') userId: number) {
@@ -56,6 +81,11 @@ export class UserController {
     return { message: 'success' };
   }
 
+  /**
+   * Change user password.
+   * Requires authentication.
+   * @param data - Object containing current and new passwords.
+   */
   @UseGuards(AuthGuard)
   @Post('changePassword')
   public async changePassword(@Body() data: ChangePassword) {
