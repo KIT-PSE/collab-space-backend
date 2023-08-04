@@ -236,6 +236,17 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  @SubscribeMessage('close-channel')
+  @UseRequestContext()
+  public async closeChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { channelId: string },
+  ) {
+    await this.channels.close(payload.channelId);
+
+    return true;
+  }
+
   public async handleConnection(client: Socket) {
     /*
      * This is a workaround for getting the client's rooms in the disconnecting event.

@@ -52,9 +52,13 @@ export class RoomService {
   public async delete(id: number, category: Category): Promise<void> {
     const room = await this.get(id, category);
 
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
     this.eventEmitter.emit('room.deleted', room);
 
-    await this.em.removeAndFlush(room);
+    await this.repository.nativeDelete({ id });
   }
 
   public async getNotes(id: number): Promise<Note[]> {
