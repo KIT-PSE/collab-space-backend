@@ -6,7 +6,7 @@ import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
 import { BrowserService } from '../browser/browser.service';
-import {OnEvent} from "@nestjs/event-emitter";
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ChannelService {
