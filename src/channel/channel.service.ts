@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
+import { BrowserService } from '../browser/browser.service';
 
 @Injectable()
 export class ChannelService {
@@ -15,6 +16,7 @@ export class ChannelService {
     @Inject(forwardRef(() => RoomService))
     private readonly rooms: RoomService,
     private readonly users: UserService,
+    private readonly browsers: BrowserService,
   ) {}
 
   public async open(
@@ -57,11 +59,16 @@ export class ChannelService {
     client: Socket,
     channelId: string,
     name: string,
+    password?: string,
   ): Promise<Channel> {
     const channel = this.channels[channelId];
 
     if (!channel) {
       throw new WsException('Channel not found');
+    }
+
+    if (channel.room.password && channel.room.password !== password) {
+      throw new WsException('Wrong password');
     }
 
     await channel.joinAsStudent(client, name);
@@ -122,6 +129,9 @@ export class ChannelService {
     if (!channel) {
       throw new WsException('Channel not found');
     }
+
+    await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
+    await this.browsers.closeBrowserContext(channelId);
 
     await channel.close();
     delete this.channels[channelId];

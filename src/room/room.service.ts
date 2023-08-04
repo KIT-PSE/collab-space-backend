@@ -4,6 +4,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Room } from './room.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
+import { Note } from '../note/note.entity';
 import { ChannelService } from '../channel/channel.service';
 
 @Injectable()
@@ -56,5 +57,20 @@ export class RoomService {
     await this.channels.close(channel.id);
 
     await this.em.removeAndFlush(room);
+  }
+
+  public async getNotes(id: number): Promise<Note[]> {
+    const room = await this.repository.findOneOrFail({ id });
+    return room.notes.loadItems();
+  }
+
+  public async updateWhiteboard(id: number, canvas: string): Promise<Room> {
+    const room = await this.repository.findOneOrFail({ id });
+
+    room.whiteboardCanvas = canvas;
+
+    await this.em.persistAndFlush(room);
+
+    return room;
   }
 }
