@@ -138,7 +138,7 @@ export class ChannelService {
     this.logger.debug(`Closed ${channel}`);
   }
 
-  @OnEvent('room:deleted')
+  @OnEvent('room.deleted')
   public async onRoomDeleted(room: Room) {
     const channel = this.getChannelFromRoom(room);
     if (channel) {
