@@ -12,6 +12,10 @@ describe('CategoryController', () => {
     controller = module.get<CategoryController>(CategoryController);
   });
 
+  /**
+   * Test case to ensure that the CategoryController is defined.
+   * It checks whether the controller instance is created successfully.
+   */
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });

@@ -12,6 +12,9 @@ describe('SocketGateway', () => {
     gateway = module.get<ChannelGateway>(ChannelGateway);
   });
 
+  /**
+   * Test to check if the ChannelGateway instance is defined.
+   */
   it('should be defined', () => {
     expect(gateway).toBeDefined();
   });

@@ -9,9 +9,13 @@ import {
 import { useContainer } from 'class-validator';
 import { NotFoundInterceptor } from './common/not-found.interceptor';
 
+/**
+ * Bootstrap function to initialize the NestJS application.
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS in development environment
   if (process.env.NODE_ENV === 'development') {
     app.enableCors({
       origin: [process.env.FRONTEND_URL],
@@ -19,10 +23,19 @@ async function bootstrap() {
     });
   }
 
+  // Set global prefix for API routes
   app.setGlobalPrefix('api/v1');
+
+  // Configure cookie parser middleware
   app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
+
+  // Configure global validation pipe
   app.useGlobalPipes(new ValidationPipe({ exceptionFactory }));
+
+  // Attach global interceptor for handling not found errors
   app.useGlobalInterceptors(new NotFoundInterceptor());
+
+  // Enable shutdown hooks for graceful shutdown
   app.enableShutdownHooks();
 
   // allows us to use NestJS DI in class-validator custom decorators
@@ -33,7 +46,7 @@ async function bootstrap() {
 
 bootstrap();
 
-/*
+/**
  * The existing factory function returns an array of errors without
  * associating these errors with their respective properties.
  *

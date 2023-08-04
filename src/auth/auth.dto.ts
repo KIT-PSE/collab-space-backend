@@ -4,6 +4,9 @@ import { User } from '../user/user.entity';
 import { IsUnique } from '../common/constraints/unique';
 import { Match } from '../common/constraints/match';
 
+/**
+ * Data structure for registering a new user.
+ */
 export class RegisterUser {
   @IsNotEmpty({
     message: 'Schule / Universität oder Organisation darf nicht leer sein',
@@ -43,8 +46,14 @@ export class RegisterUser {
   confirmPassword: string;
 }
 
+/**
+ * Data structure for creating a new user, based on the RegisterUser class but without confirmPassword field.
+ */
 export class CreateUser extends OmitType(RegisterUser, ['confirmPassword']) {}
 
+/**
+ * Data structure for user login.
+ */
 export class LoginUser {
   @IsEmail(
     {},
@@ -60,6 +69,9 @@ export class LoginUser {
   password: string;
 }
 
+/**
+ * Data structure for changing user password.
+ */
 export class ChangePassword {
   @IsNotEmpty({
     message: 'Bitte gib dein aktuelles Passwort ein',
@@ -83,6 +95,9 @@ export class ChangePassword {
   confirmNewPassword: string;
 }
 
+/**
+ * Payload structure returned after successful authentication.
+ */
 export interface AuthPayload {
   token: string;
   user: User;

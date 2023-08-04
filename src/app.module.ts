@@ -10,6 +10,9 @@ import { ExistsConstraint } from './common/constraints/exists';
 import { ChannelModule } from './channel/channel.module';
 import { BrowserModule } from './browser/browser.module';
 
+/**
+ * Main application module where other modules are imported and configured.
+ */
 @Module({
   imports: [
     MikroOrmModule.forRoot(),
