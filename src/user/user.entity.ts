@@ -1,3 +1,6 @@
+/**
+ * @fileOverview Definition of the User entity class.
+ */
 import {
   Collection,
   Entity,
@@ -7,6 +10,9 @@ import {
 } from '@mikro-orm/core';
 import { Category } from '../category/category.entity';
 
+/**
+ * Entity representing a user.
+ */
 @Entity({ tableName: 'users' })
 export class User {
   @PrimaryKey()
@@ -36,6 +42,13 @@ export class User {
   @Property()
   role: 'user' | 'admin' = 'user';
 
+  /**
+   * Constructor to create a new User instance.
+   * @param name - The user's name.
+   * @param email - The user's email.
+   * @param organization - The user's organization.
+   * @param password - The user's password.
+   */
   constructor(
     name: string,
     email: string,
@@ -48,6 +61,10 @@ export class User {
     this.password = password;
   }
 
+  /**
+   * Get a string representation of the user.
+   * @returns A string containing user ID and name.
+   */
   public toString(): string {
     return `User{${this.id}: "${this.name}"}`;
   }
