@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer';
 import * as path from 'path';
 import * as process from 'process';
 import { Server } from 'socket.io';
-import { Channel } from "../channel/channel";
+import { Channel } from '../channel/channel';
 
 const LOGGER = new Logger('BrowserService');
 
