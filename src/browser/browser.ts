@@ -1,12 +1,8 @@
-import {
-  Browser as PuppeteerBrowser,
-  BrowserContext,
-  KeyInput,
-  Page,
-} from 'puppeteer';
+import { Browser as PuppeteerBrowser, KeyInput, Page } from 'puppeteer';
 import { Logger } from '@nestjs/common';
 import * as path from 'path';
 import * as process from 'process';
+import { Server } from 'socket.io';
 
 const LOGGER = new Logger('Browser');
 
@@ -28,8 +24,9 @@ export class Browser {
    */
   constructor(
     private browser: PuppeteerBrowser,
-    // private browser: BrowserContext,
-    public readonly url: string,
+    public url: string,
+    private readonly server: Server,
+    private readonly channelId: string,
   ) {}
 
   /**
@@ -45,6 +42,13 @@ export class Browser {
 
     await this.page.goto(this.url);
     await this.page.setViewport({ width: 1920, height: 1080 });
+
+    this.page.on('domcontentloaded', async () => {
+      const url = await this.page.url();
+      this.url = url;
+      this.server.to(this.channelId).emit('browser-url', url);
+      await this.page.setViewport({ width: 1920, height: 1080 });
+    });
 
     this.page.on('load', async () => {
       /**
@@ -62,7 +66,6 @@ export class Browser {
     await this.page.bringToFront();
 
     const id = await extensionPage.evaluate(async () => {
-      console.log('hello world');
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return await START_RECORDING();
@@ -246,6 +249,7 @@ async function installMouseHelper(page) {
           },
           true,
         );
+
         function updateButtons(buttons) {
           for (let i = 0; i < 5; i++) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

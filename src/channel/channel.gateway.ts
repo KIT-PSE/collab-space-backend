@@ -24,7 +24,11 @@ const WEB_SOCKET_OPTIONS =
 /**
  * WebSocket gateway for handling real-time communication related to channels.
  */
-@WebSocketGateway(WEB_SOCKET_OPTIONS)
+@WebSocketGateway({
+  ...WEB_SOCKET_OPTIONS,
+  maxHttpBufferSize: 1e8,
+})
+
 export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
   public server: Server;
@@ -144,9 +148,11 @@ export class ChannelGateway implements OnGatewayConnection {
     }));
 
     const browserPeerId = this.browsers.getPeerId(channel.id);
+    const browser = this.browsers.getFromChannel(channel);
 
     return {
       browserPeerId: browserPeerId || '',
+      browserUrl: browser?.url || 'https://www.google.com',
       room: {
         ...channel.room,
         category: channel.room.category.id,

@@ -1,8 +1,10 @@
 import { Browser } from './browser';
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import puppeteer, { Browser as PuppeteerBrowser } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import * as path from 'path';
 import * as process from 'process';
+import { Server } from 'socket.io';
+import { Channel } from '../channel/channel';
 
 const LOGGER = new Logger('BrowserService');
 
@@ -14,8 +16,7 @@ const EXTENSION_ID = 'jjndjgheafjngoipoacpjgeicjeomjli';
  */
 @Injectable()
 export class BrowserService implements OnModuleDestroy {
-  public browser: PuppeteerBrowser | null;
-  public browserContexts: Map<string, Browser> = new Map();
+  private browserContexts: Map<string, Browser> = new Map();
 
   /**
    * Opens a new Puppeteer browser instance.
@@ -51,16 +52,19 @@ export class BrowserService implements OnModuleDestroy {
    * @param url - URL of the website to open.
    * @returns Peer ID associated with the browser context.
    */
-  public async openWebsite(channelId: string, url: string): Promise<string> {
+  public async openWebsite(
+    channelId: string,
+    url: string,
+    server: Server,
+  ): Promise<string> {
     LOGGER.debug(`Opening website with url: ${url}`);
 
     if (!this.browserContexts.has(channelId)) {
       LOGGER.debug(`Creating new browser context for channel: ${channelId}`);
 
-      //const browserContext = await this.browser.createIncognitoBrowserContext();
       const browserContext = await this.openBrowser();
 
-      const browser = new Browser(browserContext, url);
+      const browser = new Browser(browserContext, url, server, channelId);
 
       this.browserContexts.set(channelId, browser);
 
@@ -82,6 +86,17 @@ export class BrowserService implements OnModuleDestroy {
   public getPeerId(channelId: string): string {
     return this.browserContexts.get(channelId)?.peerId;
   }
+
+
+ /**
+  * Retrieve the browser context associated with a specific channel.
+  * @param channel The channel for which to retrieve the browser context.
+  * @returns The browser context associated with the channel, or null if not found.
+  */
+ public getFromChannel(channel: Channel): Browser | null {
+   return this.browserContexts.get(channel.id) ?? null;
+ }
+
 
   /**
    * Moves the mouse cursor to a specific position in a browser context.
@@ -187,8 +202,6 @@ export class BrowserService implements OnModuleDestroy {
    * Closes the service, disposing of browser instances and contexts.
    */
   public async close(): Promise<void> {
-    await this.browser?.close();
-
     for (const browser of this.browserContexts.values()) {
       await browser.close();
     }
