@@ -5,6 +5,7 @@ import { Room } from './room.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { Category } from '../category/category.entity';
 import { Note } from '../note/note.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 /**
  * Service responsible for managing room entities.
@@ -15,6 +16,7 @@ export class RoomService {
     private readonly em: EntityManager,
     @InjectRepository(Room)
     private readonly repository: EntityRepository<Room>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -83,7 +85,13 @@ export class RoomService {
   public async delete(id: number, category: Category): Promise<void> {
     const room = await this.get(id, category);
 
-    await this.em.removeAndFlush(room);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    this.eventEmitter.emit('room.deleted', room);
+
+    await this.repository.nativeDelete({ id });
   }
 
   /**

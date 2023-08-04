@@ -303,6 +303,24 @@ export class ChannelGateway implements OnGatewayConnection {
   }
 
   /**
+   * Handle an 'close-channel' event to close a channel.
+   * @param client The connected socket client.
+   * @param payload The payload containing channelId.
+   * @returns A boolean indicating success.
+   */
+  @SubscribeMessage('close-channel')
+  @UseRequestContext()
+  public async closeChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { channelId: string },
+  ) {
+    const channel = await this.channels.fromId(payload.channelId);
+    await this.channels.close(channel);
+
+    return true;
+  }
+
+  /**
    * Handle the connection event.
    *
    * @param client The connected socket client.

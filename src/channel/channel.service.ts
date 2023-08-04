@@ -6,6 +6,7 @@ import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
 import { BrowserService } from '../browser/browser.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 /**
  * Service for managing channels and real-time communication.
@@ -158,22 +159,48 @@ export class ChannelService {
       this.logger.debug(`Left ${channel} as student ${client.id}`);
     }
 
-    /*
-     * If the channel is empty after the client left, close it after 1 second.
-     * This is a temporary solution to prevent the channel from being
-     * closed when the teacher leaves and rejoins.
-     *
-     * TODO: implement a better solution
-     */
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
-      channel.setCloseTimeout(async () => {
-        delete this.channels[channelId];
-        await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
-        await this.browsers.closeBrowserContext(channelId);
-        this.logger.debug(`Closed ${channel}`);
+      channel.setCloseTimeout(() => {
+        this.close(channel);
       });
     }
+  }
+
+  public async close(channel: Channel) {
+    await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
+    await this.browsers.closeBrowserContext(channel.id);
+
+    await channel.close();
+    delete this.channels[channel.id];
+    this.logger.debug(`Closed ${channel}`);
+  }
+
+  /**
+   * Event listener for when a room is deleted. Closes the associated channel, if it exists.
+   *
+   * @param room - The room entity that was deleted.
+   */
+  @OnEvent('room.deleted')
+  public async onRoomDeleted(room: Room) {
+    const channel = this.getChannelFromRoom(room);
+
+    if (channel) {
+      await this.close(channel);
+    }
+  }
+
+  /**
+   * Gets the channel associated with the given id.
+   *
+   * @param id - The ID of the channel.
+   */
+  public fromId(id: string): Channel {
+    if (!this.exists(id)) {
+      throw new WsException('Channel not found');
+    }
+
+    return this.channels[id];
   }
 
   /**
