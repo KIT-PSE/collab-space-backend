@@ -41,6 +41,7 @@ export class BrowserGateway {
     const peerId = await this.browserService.openWebsite(
       channel.id,
       payload.url,
+      this.server,
     );
     this.server.to(channel.id).emit('open-website', peerId);
 

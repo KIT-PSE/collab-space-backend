@@ -1,8 +1,10 @@
 import { Browser } from './browser';
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import puppeteer, { Browser as PuppeteerBrowser } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import * as path from 'path';
 import * as process from 'process';
+import { Server } from 'socket.io';
+import { Channel } from '../channel/channel';
 
 const LOGGER = new Logger('BrowserService');
 
@@ -11,8 +13,7 @@ const EXTENSION_ID = 'jjndjgheafjngoipoacpjgeicjeomjli';
 
 @Injectable()
 export class BrowserService implements OnModuleDestroy {
-  public browser: PuppeteerBrowser | null;
-  public browserContexts: Map<string, Browser> = new Map();
+  private browserContexts: Map<string, Browser> = new Map();
 
   private async openBrowser() {
     const args = [];
@@ -34,48 +35,21 @@ export class BrowserService implements OnModuleDestroy {
         height: 1080,
       },
     });
-
-    /**
-     * Tried to enable extension in incognito mode, so that for every new room a
-     * new IncognitoBrowserContext is created instead of a completely new browser.
-     * But I did not get this to work.
-     *
-     * In theory if a new browser instance is created for every room, this code can
-     * be moved into the browser class.
-     */
-    /*
-    const settings = await this.browser.newPage();
-    await settings.goto(`chrome://extensions/?id=${EXTENSION_ID}`);
-    await settings.evaluate(() => {
-      (document as any)
-        .querySelector('extensions-manager')
-        .shadowRoot.querySelector(
-          '#viewManager > extensions-detail-view.active',
-        )
-        .shadowRoot.querySelector(
-          'div#container.page-container > div.page-content > div#options-section extensions-toggle-row#allow-incognito',
-        )
-        .shadowRoot.querySelector('label#label input')
-        .click();
-    });
-    await settings.close();
-     */
   }
 
-  public async openWebsite(channelId: string, url: string): Promise<string> {
+  public async openWebsite(
+    channelId: string,
+    url: string,
+    server: Server,
+  ): Promise<string> {
     LOGGER.debug(`Opening website with url: ${url}`);
-
-    /*if (!this.browser) {
-      await this.openBrowser();
-    }*/
 
     if (!this.browserContexts.has(channelId)) {
       LOGGER.debug(`Creating new browser context for channel: ${channelId}`);
 
-      //const browserContext = await this.browser.createIncognitoBrowserContext();
       const browserContext = await this.openBrowser();
 
-      const browser = new Browser(browserContext, url);
+      const browser = new Browser(browserContext, url, server, channelId);
 
       this.browserContexts.set(channelId, browser);
 
@@ -90,6 +64,10 @@ export class BrowserService implements OnModuleDestroy {
 
   public getPeerId(channelId: string): string {
     return this.browserContexts.get(channelId)?.peerId;
+  }
+
+  public getFromChannel(channel: Channel): Browser | null {
+    return this.browserContexts.get(channel.id) ?? null;
   }
 
   public async moveMouse(
@@ -138,8 +116,6 @@ export class BrowserService implements OnModuleDestroy {
   }
 
   public async close(): Promise<void> {
-    await this.browser?.close();
-
     for (const browser of this.browserContexts.values()) {
       await browser.close();
     }
