@@ -14,6 +14,9 @@ import { RoomService } from './room.service';
 import { AuthService } from '../auth/auth.service';
 import { CategoryService } from '../category/category.service';
 
+/**
+ * Controller responsible for handling room-related endpoints.
+ */
 @Controller('category/:category/room')
 export class RoomController {
   constructor(
@@ -22,6 +25,13 @@ export class RoomController {
     private readonly auth: AuthService,
   ) {}
 
+  /**
+   * Create a new room within a category.
+   *
+   * @param categoryId - The ID of the category.
+   * @param data - The data for creating a room.
+   * @returns The created room.
+   */
   @Post('/')
   @UseGuards(AuthGuard)
   public async create(
@@ -33,6 +43,14 @@ export class RoomController {
     return this.rooms.create(data.name, category, data.password);
   }
 
+  /**
+   * Update an existing room within a category.
+   *
+   * @param categoryId - The ID of the category.
+   * @param roomId - The ID of the room to be updated.
+   * @param data - The updated room data.
+   * @returns The updated room.
+   */
   @Put('/:room')
   @UseGuards(AuthGuard)
   public async update(
@@ -45,6 +63,13 @@ export class RoomController {
     return this.rooms.update(roomId, category, data.name);
   }
 
+  /**
+   * Delete a room within a category.
+   *
+   * @param categoryId - The ID of the category.
+   * @param roomId - The ID of the room to be deleted.
+   * @returns A boolean indicating if the deletion was successful.
+   */
   @Delete('/:room')
   @UseGuards(AuthGuard)
   public async delete(
@@ -56,6 +81,13 @@ export class RoomController {
     return this.rooms.delete(roomId, category);
   }
 
+  /**
+   * Get notes associated with a room.
+   *
+   * @param categoryId - The ID of the category.
+   * @param roomId - The ID of the room.
+   * @returns Notes associated with the specified room.
+   */
   @Get('/:room/notes')
   public async getNotes(
     @Param('category') categoryId: number,

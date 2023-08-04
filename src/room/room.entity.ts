@@ -10,6 +10,9 @@ import {
 import { Category } from '../category/category.entity';
 import { Note } from '../note/note.entity';
 
+/**
+ * Represents a room entity.
+ */
 @Entity({ tableName: 'rooms' })
 export class Room {
   @PrimaryKey()
@@ -39,12 +42,21 @@ export class Room {
   @Property({ type: types.blob, nullable: true })
   whiteboardCanvas?;
 
+  /**
+   * Creates a new instance of the Room class.
+   * @param name - The name of the room.
+   * @param category - The category that the room belongs to.
+   * @param password - The password for the room (optional).
+   */
   constructor(name: string, category: Category, password?: string) {
     this.name = name;
     this.category = category;
     this.password = password;
   }
 
+  /**
+   * Returns a string representation of the room.
+   */
   public toString(): string {
     return `Room{${this.id}: "${this.name}"}`;
   }

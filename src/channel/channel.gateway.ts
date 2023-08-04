@@ -21,6 +21,9 @@ const WEB_SOCKET_OPTIONS =
     ? {}
     : { cors: { origin: process.env.FRONTEND_URL } };
 
+/**
+ * WebSocket gateway for handling real-time communication related to channels.
+ */
 @WebSocketGateway(WEB_SOCKET_OPTIONS)
 export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
@@ -33,6 +36,13 @@ export class ChannelGateway implements OnGatewayConnection {
   ) {}
 
   // todo: add authentication - only a logged in teacher should be able to open a room
+  /**
+   * Handle an 'open-room' event to open a room.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing userId and roomId.
+   * @returns The channel state.
+   */
   @SubscribeMessage('open-room')
   @UseRequestContext()
   public async openRoom(
@@ -49,6 +59,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return this.channelState(channel);
   }
 
+  /**
+   * Handle a 'join-room-as-student' event to join a room as a student.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing name, channelId, and password (optional).
+   * @returns The channel state or an error object.
+   */
   @SubscribeMessage('join-room-as-student')
   @UseRequestContext()
   public async joinChannelAsStudent(
@@ -79,6 +96,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return this.channelState(channel);
   }
 
+  /**
+   * Handle a 'join-room-as-teacher' event to join a room as a teacher.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing channelId and userId.
+   * @returns The channel state.
+   */
   @SubscribeMessage('join-room-as-teacher')
   @UseRequestContext()
   public async joinChannelAsTeacher(
@@ -134,6 +158,11 @@ export class ChannelGateway implements OnGatewayConnection {
     };
   }
 
+  /**
+   * Handle a 'leave-room' event to allow a user to leave a room.
+   *
+   * @param client The connected socket client.
+   */
   @SubscribeMessage('leave-room')
   @UseRequestContext()
   public async leaveRoom(@ConnectedSocket() client: Socket) {
@@ -145,6 +174,13 @@ export class ChannelGateway implements OnGatewayConnection {
     }
   }
 
+  /**
+   * Handle a 'change-name' event to change a user's name.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing the new name.
+   * @returns A boolean indicating success.
+   */
   @SubscribeMessage('change-name')
   @UseRequestContext()
   public async changeName(
@@ -162,6 +198,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  /**
+   * Handle a 'connect-webcam' event to add a webcam connection.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing userId and peerId.
+   * @returns A boolean indicating success.
+   */
   @SubscribeMessage('connect-webcam')
   @UseRequestContext()
   public async addWebcam(
@@ -181,6 +224,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  /**
+   * Handle an 'update-webcam' event to update webcam settings.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing video and audio settings.
+   * @returns A boolean indicating success.
+   */
   @SubscribeMessage('update-webcam')
   @UseRequestContext()
   public async updateWebcam(
@@ -199,6 +249,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  /**
+   * Handle an 'update-handSignal' event to update hand signal.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing hand signal setting.
+   * @returns A boolean indicating success.
+   */
   @SubscribeMessage('update-handSignal')
   @UseRequestContext()
   public async updateHandSignal(
@@ -216,6 +273,13 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  /**
+   * Handle an 'update-permission' event to update student permission.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing studentId and permission setting.
+   * @returns A boolean indicating success.
+   */
   @SubscribeMessage('update-permission')
   @UseRequestContext()
   public async updatePermission(
@@ -233,6 +297,11 @@ export class ChannelGateway implements OnGatewayConnection {
     return true;
   }
 
+  /**
+   * Handle the connection event.
+   *
+   * @param client The connected socket client.
+   */
   public async handleConnection(client: Socket) {
     /*
      * This is a workaround for getting the client's rooms in the disconnecting event.

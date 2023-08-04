@@ -7,6 +7,9 @@ import {
 } from '@mikro-orm/core';
 import { Room } from '../room/room.entity';
 
+/**
+ * Represents a Note entity that is associated with a Room.
+ */
 @Entity({ tableName: 'notes' })
 export class Note {
   @PrimaryKey()
@@ -27,6 +30,11 @@ export class Note {
   @ManyToOne({ onDelete: 'cascade', hidden: true })
   room: Room;
 
+  /**
+   * Creates a new instance of the Note entity.
+   * @param name - The name of the note.
+   * @param room - The associated Room entity.
+   */
   constructor(name: string, room: Room) {
     this.name = name;
     this.room = room;
