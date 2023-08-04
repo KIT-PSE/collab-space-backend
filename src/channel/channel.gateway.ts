@@ -123,9 +123,11 @@ export class ChannelGateway implements OnGatewayConnection {
     }));
 
     const browserPeerId = this.browsers.getPeerId(channel.id);
+    const browser = this.browsers.getFromChannel(channel);
 
     return {
       browserPeerId: browserPeerId || '',
+      browserUrl: browser?.url || 'https://www.google.com',
       room: {
         ...channel.room,
         category: channel.room.category.id,
