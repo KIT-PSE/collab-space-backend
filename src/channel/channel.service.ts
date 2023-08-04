@@ -162,23 +162,17 @@ export class ChannelService {
     if (channel?.isEmpty()) {
       channel.clearCloseTimeout();
       channel.setCloseTimeout(() => {
-        this.close(channelId);
+        this.close(channel);
       });
     }
   }
 
-  public async close(channelId: string) {
-    const channel = this.channels[channelId];
-
-    if (!channel) {
-      throw new WsException('Channel not found');
-    }
-
+  public async close(channel: Channel) {
     await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
-    await this.browsers.closeBrowserContext(channelId);
+    await this.browsers.closeBrowserContext(channel.id);
 
     await channel.close();
-    delete this.channels[channelId];
+    delete this.channels[channel.id];
     this.logger.debug(`Closed ${channel}`);
   }
 
@@ -190,9 +184,23 @@ export class ChannelService {
   @OnEvent('room.deleted')
   public async onRoomDeleted(room: Room) {
     const channel = this.getChannelFromRoom(room);
+
     if (channel) {
-      await this.close(channel.id);
+      await this.close(channel);
     }
+  }
+
+  /**
+   * Gets the channel associated with the given id.
+   *
+   * @param id - The ID of the channel.
+   */
+  public fromId(id: string): Channel {
+    if (!this.exists(id)) {
+      throw new WsException('Channel not found');
+    }
+
+    return this.channels[id];
   }
 
   /**

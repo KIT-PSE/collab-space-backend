@@ -314,7 +314,8 @@ export class ChannelGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { channelId: string },
   ) {
-    await this.channels.close(payload.channelId);
+    const channel = await this.channels.fromId(payload.channelId);
+    await this.channels.close(channel);
 
     return true;
   }
