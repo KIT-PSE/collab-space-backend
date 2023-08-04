@@ -21,7 +21,10 @@ const WEB_SOCKET_OPTIONS =
     ? {}
     : { cors: { origin: process.env.FRONTEND_URL } };
 
-@WebSocketGateway(WEB_SOCKET_OPTIONS)
+@WebSocketGateway({
+  ...WEB_SOCKET_OPTIONS,
+  maxHttpBufferSize: 1e8,
+})
 export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
   public server: Server;
