@@ -4,7 +4,6 @@ import { IsNotEmpty } from 'class-validator';
  * Data transfer object (DTO) for creating a new category.
  */
 export class CreateCategory {
-
   /**
    * The name of the category to be created.
    */

@@ -87,16 +87,14 @@ export class BrowserService implements OnModuleDestroy {
     return this.browserContexts.get(channelId)?.peerId;
   }
 
-
- /**
-  * Retrieve the browser context associated with a specific channel.
-  * @param channel The channel for which to retrieve the browser context.
-  * @returns The browser context associated with the channel, or null if not found.
-  */
- public getFromChannel(channel: Channel): Browser | null {
-   return this.browserContexts.get(channel.id) ?? null;
- }
-
+  /**
+   * Retrieve the browser context associated with a specific channel.
+   * @param channel The channel for which to retrieve the browser context.
+   * @returns The browser context associated with the channel, or null if not found.
+   */
+  public getFromChannel(channel: Channel): Browser | null {
+    return this.browserContexts.get(channel.id) ?? null;
+  }
 
   /**
    * Moves the mouse cursor to a specific position in a browser context.

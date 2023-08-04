@@ -11,7 +11,6 @@ import { ChannelService } from '../channel/channel.service';
  */
 @Injectable()
 export class CategoryService {
-
   /**
    * Initializes an instance of the CategoryService.
    *

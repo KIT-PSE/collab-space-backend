@@ -14,7 +14,6 @@ import { Room } from '../room/room.entity';
  */
 @Entity({ tableName: 'categories' })
 export class Category {
-
   /**
    * The primary key ID of the category.
    */

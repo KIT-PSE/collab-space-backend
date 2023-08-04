@@ -28,7 +28,6 @@ const WEB_SOCKET_OPTIONS =
   ...WEB_SOCKET_OPTIONS,
   maxHttpBufferSize: 1e8,
 })
-
 export class ChannelGateway implements OnGatewayConnection {
   @WebSocketServer()
   public server: Server;
