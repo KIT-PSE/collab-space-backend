@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -6,6 +6,7 @@ import { Channel } from './channel';
 import { RoomService } from '../room/room.service';
 import { Room } from '../room/room.entity';
 import { BrowserService } from '../browser/browser.service';
+import {OnEvent} from "@nestjs/event-emitter";
 
 @Injectable()
 export class ChannelService {
@@ -13,7 +14,6 @@ export class ChannelService {
   private readonly channels: { [key: string]: Channel } = {};
 
   constructor(
-    @Inject(forwardRef(() => RoomService))
     private readonly rooms: RoomService,
     private readonly users: UserService,
     private readonly browsers: BrowserService,
@@ -136,6 +136,14 @@ export class ChannelService {
     await channel.close();
     delete this.channels[channelId];
     this.logger.debug(`Closed ${channel}`);
+  }
+
+  @OnEvent('room:deleted')
+  public async onRoomDeleted(room: Room) {
+    const channel = this.getChannelFromRoom(room);
+    if (channel) {
+      await this.close(channel.id);
+    }
   }
 
   public fromClientOrFail(client: Socket): Channel {

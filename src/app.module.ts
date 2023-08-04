@@ -9,11 +9,13 @@ import { RoomModule } from './room/room.module';
 import { ExistsConstraint } from './common/constraints/exists';
 import { ChannelModule } from './channel/channel.module';
 import { BrowserModule } from './browser/browser.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     MikroOrmModule.forRoot(),
     ConfigModule.forRoot(),
+    EventEmitterModule.forRoot(),
     AuthModule,
     UserModule,
     CategoryModule,

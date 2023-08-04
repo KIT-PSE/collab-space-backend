@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ChannelGateway } from './channel.gateway';
 import { ChannelService } from './channel.service';
 import { BrowserGateway } from './browser.gateway';
@@ -8,7 +8,7 @@ import { WhiteboardGateway } from './whiteboard.gateway';
 import { RoomModule } from '../room/room.module';
 
 @Module({
-  imports: [NoteModule, forwardRef(() => RoomModule)],
+  imports: [NoteModule, RoomModule],
   providers: [
     ChannelGateway,
     NotesGateway,
