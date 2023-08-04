@@ -14,10 +14,20 @@ import { AuthGuard } from './auth.guard';
 import { Response } from 'express';
 import { RegisterUser, LoginUser } from './auth.dto';
 
+/**
+ * Controller handling authentication-related operations.
+ */
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  /**
+   * Registers a new user.
+   *
+   * @param data - Registration data for the new user.
+   * @param response - Express response object to set cookies.
+   * @returns The registration payload.
+   */
   @HttpCode(HttpStatus.OK)
   @Post('register')
   public async register(
@@ -31,6 +41,13 @@ export class AuthController {
     return payload;
   }
 
+  /**
+   * Logs in a user.
+   *
+   * @param data - Login credentials of the user.
+   * @param response - Express response object to set cookies.
+   * @returns The login payload.
+   */
   @HttpCode(HttpStatus.OK)
   @Post('login')
   public async login(
@@ -44,6 +61,11 @@ export class AuthController {
     return payload;
   }
 
+  /**
+   * Retrieves the user's profile information.
+   *
+   * @returns The user's profile and token expiration.
+   */
   @UseGuards(AuthGuard)
   @Get('profile')
   public async profile() {
@@ -53,6 +75,12 @@ export class AuthController {
     return { user, exp: token.exp };
   }
 
+  /**
+   * Logs out the currently authenticated user.
+   *
+   * @param response - Express response object to clear cookies.
+   * @returns A success message.
+   */
   @UseGuards(AuthGuard)
   @Post('logout')
   public async logout(@Res({ passthrough: true }) response: Response) {
@@ -61,6 +89,12 @@ export class AuthController {
     return { message: 'success' };
   }
 
+  /**
+   * Deletes the account of the currently authenticated user.
+   *
+   * @param response - Express response object to clear cookies.
+   * @returns A success message.
+   */
   @UseGuards(AuthGuard)
   @Delete('delete')
   public async delete(@Res({ passthrough: true }) response: Response) {

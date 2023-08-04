@@ -7,6 +7,9 @@ import { Category } from '../category/category.entity';
 import { Note } from '../note/note.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+/**
+ * Service responsible for managing room entities.
+ */
 @Injectable()
 export class RoomService {
   constructor(
@@ -16,14 +19,32 @@ export class RoomService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  /**
+   * Get a room by its ID and category.
+   * @param id - The ID of the room.
+   * @param category - The category of the room.
+   * @returns The retrieved room.
+   */
   public async get(id: number, category: Category): Promise<Room> {
     return this.repository.findOneOrFail({ id, category });
   }
 
+  /**
+   * Find a room with its associated category.
+   * @param id - The ID of the room.
+   * @returns The retrieved room with its category.
+   */
   public async findOneWithCategory(id: number): Promise<Room | null> {
     return this.repository.findOne({ id }, { populate: ['category'] });
   }
 
+  /**
+   * Create a new room.
+   * @param name - The name of the room.
+   * @param category - The category of the room.
+   * @param password - The optional password for the room.
+   * @returns The created room.
+   */
   public async create(
     name: string,
     category: Category,
@@ -35,6 +56,13 @@ export class RoomService {
     return room;
   }
 
+  /**
+   * Update the name of a room.
+   * @param id - The ID of the room.
+   * @param category - The category of the room.
+   * @param name - The new name for the room.
+   * @returns The updated room.
+   */
   public async update(
     id: number,
     category: Category,
@@ -49,6 +77,11 @@ export class RoomService {
     return room;
   }
 
+  /**
+   * Delete a room.
+   * @param id - The ID of the room.
+   * @param category - The category of the room.
+   */
   public async delete(id: number, category: Category): Promise<void> {
     const room = await this.get(id, category);
 
@@ -61,11 +94,22 @@ export class RoomService {
     await this.repository.nativeDelete({ id });
   }
 
+  /**
+   * Get the notes associated with a room.
+   * @param id - The ID of the room.
+   * @returns An array of notes belonging to the room.
+   */
   public async getNotes(id: number): Promise<Note[]> {
     const room = await this.repository.findOneOrFail({ id });
     return room.notes.loadItems();
   }
 
+  /**
+   * Update the whiteboard canvas of a room.
+   * @param id - The ID of the room.
+   * @param canvas - The new whiteboard canvas content.
+   * @returns The updated room.
+   */
   public async updateWhiteboard(id: number, canvas: string): Promise<Room> {
     const room = await this.repository.findOneOrFail({ id });
 

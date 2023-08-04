@@ -5,6 +5,10 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Category } from './category.entity';
 import { ChannelModule } from '../channel/channel.module';
 
+/**
+ * Global module for handling category-related functionality.
+ * Provides services, controllers, and exports related to categories.
+ */
 @Global()
 @Module({
   imports: [MikroOrmModule.forFeature([Category]), ChannelModule],

@@ -18,17 +18,32 @@ const WEB_SOCKET_OPTIONS =
     ? {}
     : { cors: { origin: process.env.FRONTEND_URL } };
 
+/**
+ * WebSocket gateway for managing notes-related communication.
+ */
 @WebSocketGateway(WEB_SOCKET_OPTIONS)
 export class NotesGateway {
   @WebSocketServer()
   public server: Server;
 
+  /**
+   * Constructor of NotesGateway.
+   * @param orm - MikroORM instance for database interactions.
+   * @param channels - Instance of ChannelService for managing channels.
+   * @param notes - Instance of NoteService for managing notes.
+   */
   constructor(
     private orm: MikroORM,
     private channels: ChannelService,
     private notes: NoteService,
   ) {}
 
+  /**
+   * Subscribe to the 'add-note' event to add a new note.
+   * @param client - The connected socket client.
+   * @param payload - The message body containing the note's name.
+   * @returns The newly added note.
+   */
   @SubscribeMessage('add-note')
   @UseRequestContext()
   public async addNote(
@@ -43,6 +58,12 @@ export class NotesGateway {
     return note;
   }
 
+  /**
+   * Subscribe to the 'update-note' event to update an existing note.
+   * @param client - The connected socket client.
+   * @param payload - The message body containing the note's ID and updated content.
+   * @returns `true` if the note was successfully updated.
+   */
   @SubscribeMessage('update-note')
   @UseRequestContext()
   public async updateNote(
@@ -60,6 +81,12 @@ export class NotesGateway {
     return true;
   }
 
+  /**
+   * Subscribe to the 'delete-note' event to delete a note.
+   * @param client - The connected socket client.
+   * @param payload - The message body containing the note's ID.
+   * @returns `true` if the note was successfully deleted.
+   */
   @SubscribeMessage('delete-note')
   @UseRequestContext()
   public async deleteNote(

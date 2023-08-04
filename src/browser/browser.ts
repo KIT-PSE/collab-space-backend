@@ -1,28 +1,39 @@
-import {
-  Browser as PuppeteerBrowser,
-  BrowserContext,
-  KeyInput,
-  Page,
-} from 'puppeteer';
+import { Browser as PuppeteerBrowser, KeyInput, Page } from 'puppeteer';
 import { Logger } from '@nestjs/common';
 import * as path from 'path';
 import * as process from 'process';
+import { Server } from 'socket.io';
 
 const LOGGER = new Logger('Browser');
 
 const PATH_TO_EXTENSION = path.join(process.cwd(), 'browser-extension');
 const EXTENSION_ID = 'jjndjgheafjngoipoacpjgeicjeomjli';
 
+/**
+ * Represents a Puppeteer-based browser instance.
+ */
 export class Browser {
   public peerId: string;
   private page: Page;
 
+  /**
+   * Creates an instance of the Browser class.
+   *
+   * @param browser - The Puppeteer browser instance.
+   * @param url - The initial URL to open.
+   */
   constructor(
     private browser: PuppeteerBrowser,
-    // private browser: BrowserContext,
-    public readonly url: string,
+    public url: string,
+    private readonly server: Server,
+    private readonly channelId: string,
   ) {}
 
+  /**
+   * Opens a new page in the browser instance and initializes mouse tracking.
+   *
+   * @returns The ID associated with the started recording.
+   */
   public async open(): Promise<string> {
     LOGGER.debug(`Opening page with url: ${this.url}`);
     this.page = await this.browser.newPage();
@@ -31,6 +42,13 @@ export class Browser {
 
     await this.page.goto(this.url);
     await this.page.setViewport({ width: 1920, height: 1080 });
+
+    this.page.on('domcontentloaded', async () => {
+      const url = await this.page.url();
+      this.url = url;
+      this.server.to(this.channelId).emit('browser-url', url);
+      await this.page.setViewport({ width: 1920, height: 1080 });
+    });
 
     this.page.on('load', async () => {
       /**
@@ -48,7 +66,6 @@ export class Browser {
     await this.page.bringToFront();
 
     const id = await extensionPage.evaluate(async () => {
-      console.log('hello world');
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return await START_RECORDING();
@@ -60,46 +77,90 @@ export class Browser {
     return id;
   }
 
+  /**
+   * Opens a specific website in the current page.
+   *
+   * @param url - The URL of the website to open.
+   */
   public async openWebsite(url: string): Promise<void> {
     await this.page.goto(url);
   }
 
+  /**
+   * Moves the mouse cursor to a specific position.
+   *
+   * @param x - The X-coordinate of the mouse cursor.
+   * @param y - The Y-coordinate of the mouse cursor.
+   */
   public async moveMouse(x: number, y: number): Promise<void> {
     await this.page.mouse.move(x, y);
   }
 
+  /**
+   * Initiates a mouse down event.
+   */
   public async mouseDown(): Promise<void> {
     await this.page.mouse.down();
   }
 
+  /**
+   * Initiates a mouse up event.
+   */
   public async mouseUp(): Promise<void> {
     await this.page.mouse.up();
   }
 
+  /**
+   * Initiates a key down event.
+   *
+   * @param key - The key to be pressed.
+   */
   public async keyDown(key: string): Promise<void> {
     await this.page.keyboard.down(key as KeyInput);
   }
 
+  /**
+   * Initiates a key up event.
+   *
+   * @param key - The key to be released.
+   */
   public async keyUp(key: string): Promise<void> {
     await this.page.keyboard.up(key as KeyInput);
   }
 
+  /**
+   * Initiates a scroll event.
+   *
+   * @param deltaY - The amount to scroll along the Y-axis.
+   */
   public async scroll(deltaY: number): Promise<void> {
     await this.page.mouse.wheel({ deltaY });
   }
 
+  /**
+   * Reloads the current page.
+   */
   public async reload(): Promise<void> {
     await this.page.reload();
   }
 
+  /**
+   * Navigates back to the previous page.
+   */
   public async navigateBack(): Promise<void> {
     await this.page.goBack();
   }
 
+  /**
+   * Navigates forward to the next page.
+   */
   public async navigateForward(): Promise<void> {
     await this.page.goForward();
   }
 
+  /**
+   * Closes the browser instance.
+   */
   public async close(): Promise<void> {
     if (this.browser) {
       LOGGER.debug('Closing browser');
@@ -108,6 +169,11 @@ export class Browser {
   }
 }
 
+/**
+ * Helper function to install mouse tracking for puppeteer pages.
+ *
+ * @param page - The puppeteer page to install the mouse tracking on.
+ */
 async function installMouseHelper(page) {
   await page.evaluateOnNewDocument(() => {
     // Install mouse helper only for top-level frame.
@@ -183,6 +249,7 @@ async function installMouseHelper(page) {
           },
           true,
         );
+
         function updateButtons(buttons) {
           for (let i = 0; i < 5; i++) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

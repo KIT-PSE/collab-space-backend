@@ -11,6 +11,9 @@ import { ChannelModule } from './channel/channel.module';
 import { BrowserModule } from './browser/browser.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
+/**
+ * Main application module where other modules are imported and configured.
+ */
 @Module({
   imports: [
     MikroOrmModule.forRoot(),

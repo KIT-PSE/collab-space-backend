@@ -5,6 +5,9 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 
+/**
+ * Module handling authentication-related components.
+ */
 @Global()
 @Module({
   imports: [

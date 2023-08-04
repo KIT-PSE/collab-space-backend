@@ -4,6 +4,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { User } from './user.entity';
 import { UserController } from './user.controller';
 
+/**
+ * Global module providing user-related functionality.
+ */
 @Global()
 @Module({
   imports: [MikroOrmModule.forFeature([User])],
