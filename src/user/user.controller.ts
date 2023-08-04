@@ -1,7 +1,3 @@
-/**
- * @fileOverview Controller for handling user-related operations.
- */
-
 import {
   Body,
   Controller,

@@ -1,7 +1,3 @@
-/**
- * @fileOverview UserModule definition.
- */
-
 import { Global, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';

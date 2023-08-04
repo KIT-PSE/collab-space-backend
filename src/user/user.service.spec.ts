@@ -1,7 +1,3 @@
-/**
- * @fileOverview Unit tests for the UserService class.
- */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 

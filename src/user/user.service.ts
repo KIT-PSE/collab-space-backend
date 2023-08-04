@@ -1,7 +1,3 @@
-/**
- * @fileOverview Service class for user-related operations.
- */
-
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/mysql';
@@ -12,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { EditUser } from './user.controller';
 
 /**
- * Injectable service for user-related operations.
+ * Service for user-related operations.
  */
 @Injectable()
 export class UserService {

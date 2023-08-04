@@ -1,7 +1,3 @@
-/**
- * @fileOverview Definition of the User entity class.
- */
-
 import {
   Collection,
   Entity,
