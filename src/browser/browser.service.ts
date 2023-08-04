@@ -9,11 +9,19 @@ const LOGGER = new Logger('BrowserService');
 const PATH_TO_EXTENSION = path.join(process.cwd(), 'browser-extension');
 const EXTENSION_ID = 'jjndjgheafjngoipoacpjgeicjeomjli';
 
+/**
+ * Service responsible for managing browser instances and interactions.
+ */
 @Injectable()
 export class BrowserService implements OnModuleDestroy {
   public browser: PuppeteerBrowser | null;
   public browserContexts: Map<string, Browser> = new Map();
 
+  /**
+   * Opens a new Puppeteer browser instance.
+   *
+   * @returns The Puppeteer browser instance.
+   */
   private async openBrowser() {
     const args = [];
 
@@ -34,40 +42,17 @@ export class BrowserService implements OnModuleDestroy {
         height: 1080,
       },
     });
-
-    /**
-     * Tried to enable extension in incognito mode, so that for every new room a
-     * new IncognitoBrowserContext is created instead of a completely new browser.
-     * But I did not get this to work.
-     *
-     * In theory if a new browser instance is created for every room, this code can
-     * be moved into the browser class.
-     */
-    /*
-    const settings = await this.browser.newPage();
-    await settings.goto(`chrome://extensions/?id=${EXTENSION_ID}`);
-    await settings.evaluate(() => {
-      (document as any)
-        .querySelector('extensions-manager')
-        .shadowRoot.querySelector(
-          '#viewManager > extensions-detail-view.active',
-        )
-        .shadowRoot.querySelector(
-          'div#container.page-container > div.page-content > div#options-section extensions-toggle-row#allow-incognito',
-        )
-        .shadowRoot.querySelector('label#label input')
-        .click();
-    });
-    await settings.close();
-     */
   }
 
+  /**
+   * Opens a website in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   * @param url - URL of the website to open.
+   * @returns Peer ID associated with the browser context.
+   */
   public async openWebsite(channelId: string, url: string): Promise<string> {
     LOGGER.debug(`Opening website with url: ${url}`);
-
-    /*if (!this.browser) {
-      await this.openBrowser();
-    }*/
 
     if (!this.browserContexts.has(channelId)) {
       LOGGER.debug(`Creating new browser context for channel: ${channelId}`);
@@ -88,10 +73,23 @@ export class BrowserService implements OnModuleDestroy {
     return browser.peerId;
   }
 
+  /**
+   * Retrieves the Peer ID associated with a channel.
+   *
+   * @param channelId - Identifier for the channel.
+   * @returns The Peer ID associated with the browser context.
+   */
   public getPeerId(channelId: string): string {
     return this.browserContexts.get(channelId)?.peerId;
   }
 
+  /**
+   * Moves the mouse cursor to a specific position in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   * @param x - The X-coordinate of the mouse cursor.
+   * @param y - The Y-coordinate of the mouse cursor.
+   */
   public async moveMouse(
     channelId: string,
     x: number,
@@ -100,43 +98,94 @@ export class BrowserService implements OnModuleDestroy {
     await this.browserContexts.get(channelId)?.moveMouse(x, y);
   }
 
+  /**
+   * Initiates a mouse down event in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async mouseDown(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.mouseDown();
   }
 
+  /**
+   * Initiates a mouse up event in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async mouseUp(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.mouseUp();
   }
 
+  /**
+   * Initiates a key down event in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   * @param key - The key to be pressed.
+   */
   public async keyDown(channelId: string, key: string): Promise<void> {
     await this.browserContexts.get(channelId)?.keyDown(key);
   }
 
+  /**
+   * Initiates a key up event in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   * @param key - The key to be released.
+   */
   public async keyUp(channelId: string, key: string): Promise<void> {
     await this.browserContexts.get(channelId)?.keyUp(key);
   }
 
+  /**
+   * Initiates a scroll event in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   * @param deltaY - The amount to scroll along the Y-axis.
+   */
   public async scroll(channelId: string, deltaY: number): Promise<void> {
     await this.browserContexts.get(channelId)?.scroll(deltaY);
   }
 
+  /**
+   * Reloads the current page in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async reload(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.reload();
   }
 
+  /**
+   * Navigates back to the previous page in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async navigateBack(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.navigateBack();
   }
 
+  /**
+   * Navigates forward to the next page in a browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async navigateForward(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.navigateForward();
   }
 
+  /**
+   * Closes a specific browser context.
+   *
+   * @param channelId - Identifier for the channel.
+   */
   public async closeBrowserContext(channelId: string): Promise<void> {
     await this.browserContexts.get(channelId)?.close();
     this.browserContexts.delete(channelId);
   }
 
+  /**
+   * Closes the service, disposing of browser instances and contexts.
+   */
   public async close(): Promise<void> {
     await this.browser?.close();
 
@@ -145,6 +194,9 @@ export class BrowserService implements OnModuleDestroy {
     }
   }
 
+  /**
+   * Handles cleanup on module destruction.
+   */
   public async onModuleDestroy(): Promise<void> {
     await this.close();
   }
