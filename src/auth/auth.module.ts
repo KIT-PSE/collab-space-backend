@@ -5,23 +5,22 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 
+export const jwtModuleConfig = {
+  global: true,
+  secret: 'secret',
+  signOptions: { expiresIn: '1h' },
+  verifyOptions: {
+    ignoreExpiration: false,
+    audience: 'collab-space.com',
+  },
+};
+
 /**
  * Module handling authentication-related components.
  */
 @Global()
 @Module({
-  imports: [
-    UserModule,
-    JwtModule.register({
-      global: true,
-      secret: 'secret',
-      signOptions: { expiresIn: '1h' },
-      verifyOptions: {
-        ignoreExpiration: false,
-        audience: 'collab-space.com',
-      },
-    }),
-  ],
+  imports: [UserModule, JwtModule.register(jwtModuleConfig)],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],

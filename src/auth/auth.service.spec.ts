@@ -7,6 +7,9 @@ import * as bcrypt from 'bcrypt';
 import { JwtStrategy } from './jwt.strategy';
 import * as dotenv from 'dotenv';
 import { CreateUser } from './auth.dto';
+import { jwtModuleConfig } from './auth.module';
+import { Category } from '../category/category.entity';
+import { request } from 'express';
 
 dotenv.config();
 
@@ -16,7 +19,7 @@ const testUser = {
   email: 'test@example.com',
   organization: 'Test Organization',
   password: bcrypt.hashSync('password', UserService.SALT_OR_ROUNDS),
-  categories: [],
+  categories: [] as Category[],
   createdAt: new Date(),
   updatedAt: new Date(),
   role: 'user',
@@ -32,7 +35,11 @@ describe('AuthService', () => {
         ? Promise.resolve(testUser)
         : Promise.resolve(null);
     }),
-    findOne: jest.fn(),
+    findOne: jest.fn().mockImplementation((id: number) => {
+      return id === testUser.id
+        ? Promise.resolve(testUser)
+        : Promise.resolve(null);
+    }),
     create: jest.fn().mockImplementation((data: CreateUser) => {
       return Promise.resolve({
         ...testUser,
@@ -58,19 +65,20 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useFactory: () => {
-            return new JwtService({
-              global: true,
-              secret: 'secret',
-              signOptions: { expiresIn: '1h' },
-              verifyOptions: {
-                ignoreExpiration: false,
-                audience: 'collab-space.com',
-              },
-            });
+            return new JwtService(jwtModuleConfig);
           },
         },
         { provide: UserService, useValue: userService },
-        { provide: REQUEST, useValue: {} },
+        {
+          provide: REQUEST,
+          useValue: {
+            user: {
+              sub: testUser.id,
+              exp: Date.now() + 1000 * 60,
+              iat: Date.now(),
+            },
+          },
+        },
       ],
     }).compile();
 
@@ -127,6 +135,27 @@ describe('AuthService', () => {
       });
 
       expect(payload.user.name).toEqual('New Test User');
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete a user', async () => {
+      await service.delete(1);
+      expect(userService.delete).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('user', () => {
+    it('should return the currently authenticated user', async () => {
+      const user = await service.user();
+      expect(user).toEqual(testUser);
+    });
+  });
+
+  describe('token', () => {
+    it('should return a token', async () => {
+      const token = await service.token();
+      expect(token).toBeDefined();
     });
   });
 });
