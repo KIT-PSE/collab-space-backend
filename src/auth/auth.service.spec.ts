@@ -9,7 +9,6 @@ import * as dotenv from 'dotenv';
 import { CreateUser } from './auth.dto';
 import { jwtModuleConfig } from './auth.module';
 import { Category } from '../category/category.entity';
-import { request } from 'express';
 
 dotenv.config();
 
