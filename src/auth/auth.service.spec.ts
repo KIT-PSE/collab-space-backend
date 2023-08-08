@@ -73,7 +73,7 @@ describe('AuthService', () => {
           useValue: {
             user: {
               sub: testUser.id,
-              exp: Date.now() + 1000 * 60,
+              exp: Date.now() + 1000 * 60 * 60,
               iat: Date.now(),
             },
           },
