@@ -9,6 +9,8 @@ import { Response } from 'express';
 import { CreateUser, LoginUser } from './auth.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtToken } from './jwt.strategy';
+import { isGuarded } from '../../test/utils';
+import { AuthGuard } from './auth.guard';
 
 const testUser = {
   id: 1,
@@ -145,6 +147,10 @@ describe('AuthController', () => {
       expect(authService.token).toHaveBeenCalled();
       expect(result).toEqual({ user: testUser, exp: testJwtToken.exp });
     });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.profile, AuthGuard)).toBe(true);
+    });
   });
 
   describe('logout', () => {
@@ -157,6 +163,10 @@ describe('AuthController', () => {
 
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('jwt');
       expect(result).toEqual({ message: 'success' });
+    });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.logout, AuthGuard)).toBe(true);
     });
   });
 
@@ -172,6 +182,10 @@ describe('AuthController', () => {
       expect(authService.delete).toHaveBeenCalled();
       expect(mockResponse.clearCookie).toBeCalledWith('jwt');
       expect(result).toEqual({ message: 'success' });
+    });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.delete, AuthGuard)).toBe(true);
     });
   });
 });
