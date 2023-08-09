@@ -26,7 +26,7 @@ export class UserService {
    * @returns A Promise that resolves to the found user or null if not found.
    */
   public async findOne(id: number): Promise<User | null> {
-    return this.repository.findOne(id);
+    return this.repository.findOne({ id });
   }
 
   /**
