@@ -56,8 +56,8 @@ export class AuthService {
    * @param id - ID of the user to be deleted.
    * @returns Resolves when deletion is successful.
    */
-  public async delete(id: number): Promise<void> {
-    return await this.users.delete(id);
+  public async delete(id: number): Promise<number> {
+    return this.users.delete(id);
   }
 
   /**
