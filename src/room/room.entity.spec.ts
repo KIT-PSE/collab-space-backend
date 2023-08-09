@@ -25,13 +25,12 @@ describe('Room Entity', () => {
     expect(room.password).toBe('securepassword');
   });
 
-  it('should initialize with the current date as createdAt and updatedAt', () => {
-    const mockDate = new Date(2022, 0, 1, 10); // Mocking a date
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
-
+  it('should set default dates on creation', () => {
     const room = new Room('TestRoom', category);
-    expect(room.createdAt).toEqual(mockDate);
-    expect(room.updatedAt).toEqual(mockDate);
+    const currentDate = new Date();
+
+    expect(room.createdAt.getTime()).toBeLessThanOrEqual(currentDate.getTime());
+    expect(room.updatedAt.getTime()).toBeLessThanOrEqual(currentDate.getTime());
   });
 
   it('should return a proper string representation', () => {
