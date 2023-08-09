@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Note } from './note.entity';
-import { EntityRepository } from '@mikro-orm/mysql';
 import { Room } from '../room/room.entity';
 import { Category } from '../category/category.entity';
 
