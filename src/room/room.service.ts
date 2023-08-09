@@ -82,7 +82,7 @@ export class RoomService {
    * @param id - The ID of the room.
    * @param category - The category of the room.
    */
-  public async delete(id: number, category: Category): Promise<void> {
+  public async delete(id: number, category: Category): Promise<number> {
     const room = await this.get(id, category);
 
     if (!room) {
@@ -91,7 +91,7 @@ export class RoomService {
 
     this.eventEmitter.emit('room.deleted', room);
 
-    await this.repository.nativeDelete({ id });
+    return this.repository.nativeDelete({ id });
   }
 
   /**

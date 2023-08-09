@@ -93,6 +93,8 @@ export class RoomController {
     @Param('category') categoryId: number,
     @Param('room') roomId: number,
   ) {
+    const user = await this.auth.user();
+    await this.categories.get(categoryId, user);
     return this.rooms.getNotes(roomId);
   }
 }
