@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { Category } from '../category/category.entity';
 import { Room } from './room.entity';
+import { AuthGuard } from '../auth/auth.guard';
+import { isGuarded } from '../../test/utils';
 
 const testUser = {
   id: 1,
@@ -158,6 +160,10 @@ describe('RoomController', () => {
         'Category not found',
       );
     });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.create, AuthGuard)).toBe(true);
+    });
   });
 
   describe('update', () => {
@@ -190,6 +196,10 @@ describe('RoomController', () => {
         controller.update(2, testRoom.id, updateRoomDto),
       ).rejects.toThrow('Category not found');
     });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.update, AuthGuard)).toBe(true);
+    });
   });
 
   describe('delete', () => {
@@ -210,6 +220,10 @@ describe('RoomController', () => {
         'Category not found',
       );
     });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.delete, AuthGuard)).toBe(true);
+    });
   });
 
   describe('getNotes', () => {
@@ -225,6 +239,13 @@ describe('RoomController', () => {
       );
     });
 
+    /**
+     * Aktuell wird hier noch nicht gecheckt, ob die Kategorie auch wirklich
+     * zu dem Raum gehört. Das Problem ist, dass diese Methode auch von
+     * nicht eingeloggten Usern aufgerufen werden kann. Hier muss man evtl.
+     * eine Schnittstelle in dem CategoryService einbauen, die keinen User
+     * benötigt.
+     */
     it('should throw an error if category is not found', async () => {
       await expect(controller.getNotes(2, testRoom.id)).rejects.toThrow(
         'Category not found',
