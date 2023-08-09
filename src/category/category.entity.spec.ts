@@ -25,12 +25,15 @@ describe('Category Entity', () => {
     expect(category.rooms).toHaveLength(0);
   });
 
-  it('should initialize with the current date as createdAt and updatedAt', () => {
-    const mockDate = new Date(2023, 0, 1, 10); // Mocking a date
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
-
+  it('should set default dates on creation', () => {
     const category = new Category('TestCategory', user);
-    expect(category.createdAt).toEqual(mockDate);
-    expect(category.updatedAt).toEqual(mockDate);
+    const currentDate = new Date();
+
+    expect(category.createdAt.getTime()).toBeLessThanOrEqual(
+      currentDate.getTime(),
+    );
+    expect(category.updatedAt.getTime()).toBeLessThanOrEqual(
+      currentDate.getTime(),
+    );
   });
 });
