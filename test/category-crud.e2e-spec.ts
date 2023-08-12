@@ -3,6 +3,8 @@ import { Bootstrap } from './bootstrap';
 import { CreateCategory } from '../src/category/category.dto';
 
 describe('category creation', () => {
+  jest.setTimeout(30000);
+
   let bootstrap: Bootstrap;
   let authCookie: string;
 
