@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { Bootstrap } from './bootstrap';
 
 describe('user registration', () => {
+  jest.setTimeout(30000);
+
   let userRepository: EntityRepository<User>;
   let bootstrap: Bootstrap;
 

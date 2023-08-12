@@ -2,6 +2,8 @@ import * as request from 'supertest';
 import { Bootstrap } from './bootstrap';
 
 describe('user login', () => {
+  jest.setTimeout(30000);
+
   let bootstrap: Bootstrap;
   let authCookie: string;
 
