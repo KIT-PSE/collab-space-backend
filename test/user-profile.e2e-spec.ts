@@ -23,13 +23,16 @@ describe('user login', () => {
   });
 
   it('GET /auth/profile should 200 if jwt token is passed as cookie', async () => {
-    return request(bootstrap.app.getHttpServer())
+    const response = await request(bootstrap.app.getHttpServer())
       .get('/auth/profile')
       .set('Cookie', [authCookie])
-      .expect(200)
-      .expect(({ body }) => {
-        expect(body.user).toBeDefined();
-        expect(body.exp).toBeDefined();
-      });
+      .expect(200);
+
+    const body = response.body;
+
+    expect(body.user).toBeDefined();
+    expect(body.exp).toBeDefined();
+
+    return response;
   });
 });

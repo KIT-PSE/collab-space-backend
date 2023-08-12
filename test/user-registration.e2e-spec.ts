@@ -45,15 +45,17 @@ describe('user registration', () => {
       confirmPassword: 'password',
     };
 
-    return request(bootstrap.app.getHttpServer())
+    const response = await request(bootstrap.app.getHttpServer())
       .post('/auth/register')
       .send(data)
-      .expect(201)
-      .expect(({ body }) => {
-        expect(body.token).toBeDefined();
-        expect(body.user).toBeDefined();
-        expect(body.exp).toBeDefined();
-      });
+      .expect(201);
+
+    const body = response.body;
+    expect(body.token).toBeDefined();
+    expect(body.user).toBeDefined();
+    expect(body.exp).toBeDefined();
+
+    return response;
   });
 
   it('users should contain the newly registered user', async () => {

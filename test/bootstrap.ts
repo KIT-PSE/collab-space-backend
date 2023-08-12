@@ -10,6 +10,7 @@ import { EntityManager, MikroORM } from '@mikro-orm/core';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../src/user/user.service';
 import * as cookieParser from 'cookie-parser';
+import { AppModule } from '../src/app.module';
 
 /**
  * Bootstrap class for setting up the application for testing.
@@ -25,13 +26,11 @@ export class Bootstrap {
   public async init(): Promise<INestApplication> {
     this.module = await Test.createTestingModule({
       imports: [
-        AuthModule,
-        UserModule,
+        AppModule,
         MikroOrmModule.forRoot({
           ...mikroOrmConfig,
           dbName: 'collab_space_test',
         }),
-        MikroOrmModule.forFeature([User]),
       ],
     }).compile();
 
