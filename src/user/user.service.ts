@@ -26,7 +26,7 @@ export class UserService {
    * @returns A Promise that resolves to the found user or null if not found.
    */
   public async findOne(id: number): Promise<User | null> {
-    return this.repository.findOne(id);
+    return this.repository.findOne({ id });
   }
 
   /**
@@ -86,14 +86,16 @@ export class UserService {
   /**
    * Delete a user by ID.
    * @param id - The user's ID.
+   * @returns A Promise that resolves to the number of deleted users.
    */
-  public async delete(id: number): Promise<void> {
+  public async delete(id: number): Promise<number> {
     const user = await this.repository.findOne({ id });
 
     if (!user) {
       throw new Error('User not found');
     }
-    await this.repository.nativeDelete({ id });
+
+    return this.repository.nativeDelete({ id });
   }
 
   /**
@@ -103,6 +105,11 @@ export class UserService {
    */
   public async changeUserData(data: EditUser): Promise<boolean> {
     const user = await this.findOne(data.id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     user.name = data.name;
     user.email = data.email;
     user.organization = data.organization;
