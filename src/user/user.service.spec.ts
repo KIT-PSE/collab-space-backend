@@ -4,8 +4,9 @@ import { EntityManager } from '@mikro-orm/core';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
+import { MockUserRepository } from './mock/user.repository.mock';
 
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -39,59 +40,7 @@ describe('UserService', () => {
         },
         {
           provide: getRepositoryToken(User),
-          useValue: {
-            findOne: jest
-              .fn()
-              .mockImplementation(
-                ({ id, email }: { id: number; email: string }) => {
-                  if (id === 1 || email === 'test@example.com') {
-                    return Promise.resolve(testUser);
-                  }
-                  return Promise.resolve(null);
-                },
-              ),
-            findAll: jest
-              .fn()
-              .mockResolvedValue([
-                new User(
-                  'Test User 1',
-                  'test1@example.com',
-                  'Test Org',
-                  'password',
-                ),
-                new User(
-                  'Test User 2',
-                  'test2@example.com',
-                  'Test Org',
-                  'password',
-                ),
-              ]),
-            find: jest.fn().mockImplementation((ids: number[]) => {
-              const result: User[] = [];
-              if (ids.includes(1)) {
-                result.push(testUser);
-              }
-              if (ids.includes(2)) {
-                result.push(
-                  new User(
-                    'Test User 2',
-                    'test2@example.com',
-                    'Test Org',
-                    'password',
-                  ),
-                );
-              }
-              return Promise.resolve(result);
-            }),
-            nativeDelete: jest
-              .fn()
-              .mockImplementation(({ id }: { id: number }) => {
-                if (id === 1) {
-                  return Promise.resolve(1);
-                }
-                return Promise.resolve(0);
-              }),
-          },
+          useValue: new MockUserRepository(TEST_USER),
         },
       ],
     }).compile();
@@ -110,7 +59,7 @@ describe('UserService', () => {
   describe('findOne', () => {
     it('should return a user by id', async () => {
       const user = await service.findOne(1);
-      expect(user).toEqual(testUser);
+      expect(user).toEqual(TEST_USER);
     });
 
     it('should return null if no user is found', async () => {
@@ -122,7 +71,7 @@ describe('UserService', () => {
   describe('findByEmail', () => {
     it('should return a user by email', async () => {
       const user = await service.findByEmail('test@example.com');
-      expect(user).toEqual(testUser);
+      expect(user).toEqual(TEST_USER);
     });
 
     it('should return null if no user is found', async () => {
@@ -181,16 +130,16 @@ describe('UserService', () => {
 
   describe('changePassword', () => {
     it('should change the password', async () => {
-      const prevPassword = testUser.password;
-      await service.changePassword(testUser, 'newpassword');
+      const prevPassword = TEST_USER.password;
+      await service.changePassword(TEST_USER, 'newpassword');
 
-      expect(testUser.password).not.toEqual(prevPassword);
+      expect(TEST_USER.password).not.toEqual(prevPassword);
       expect(entityManager.persistAndFlush).toHaveBeenCalled();
     });
 
     it('should not store the password in plain text', async () => {
-      await service.changePassword(testUser, 'newpassword');
-      expect(testUser.password).not.toEqual('newpassword');
+      await service.changePassword(TEST_USER, 'newpassword');
+      expect(TEST_USER.password).not.toEqual('newpassword');
     });
   });
 
@@ -215,9 +164,9 @@ describe('UserService', () => {
       };
       const result = await service.changeUserData(changeUserData);
 
-      expect(testUser.name).toEqual(changeUserData.name);
-      expect(testUser.email).toEqual(changeUserData.email);
-      expect(testUser.organization).toEqual(changeUserData.organization);
+      expect(TEST_USER.name).toEqual(changeUserData.name);
+      expect(TEST_USER.email).toEqual(changeUserData.email);
+      expect(TEST_USER.organization).toEqual(changeUserData.organization);
       expect(entityManager.persistAndFlush).toHaveBeenCalled();
       expect(result).toBeTruthy();
     });

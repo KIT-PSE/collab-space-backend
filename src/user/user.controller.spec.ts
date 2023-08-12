@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EditUser, UserController } from './user.controller';
+import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -9,8 +9,9 @@ import { AdminGuard } from '../common/guards/admin.guard';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { UnprocessableEntityException } from '@nestjs/common';
+import { MockUserService } from './mock/user.service.mock';
 
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -38,52 +39,12 @@ describe('UserController', () => {
       providers: [
         {
           provide: UserService,
-          useValue: {
-            findAll: jest
-              .fn()
-              .mockResolvedValue([
-                new User(
-                  'Test User 1',
-                  'test1@example.com',
-                  'Test Org',
-                  'password',
-                ),
-                new User(
-                  'Test User 2',
-                  'test2@example.com',
-                  'Test Org',
-                  'password',
-                ),
-              ]),
-            changeRole: jest.fn().mockImplementation((id: number) => {
-              if (id === 1) {
-                testUser.role = testUser.role === 'user' ? 'admin' : 'user';
-                return Promise.resolve(testUser);
-              }
-              throw new Error('User not found');
-            }),
-            changeUserData: jest.fn().mockImplementation((data: EditUser) => {
-              if (data.id === 1) {
-                testUser.name = data.name;
-                testUser.email = data.email;
-                testUser.organization = data.organization;
-                return Promise.resolve(true);
-              }
-              throw new Error('User not found');
-            }),
-            delete: jest.fn().mockImplementation((id: number) => {
-              if (id === 1) {
-                return Promise.resolve(1);
-              }
-              throw new Error('User not found');
-            }),
-            changePassword: jest.fn().mockResolvedValue(undefined),
-          },
+          useValue: new MockUserService(TEST_USER),
         },
         {
           provide: AuthService,
           useValue: {
-            user: jest.fn().mockResolvedValue(testUser),
+            user: () => Promise.resolve(TEST_USER),
           },
         },
         {
@@ -101,7 +62,6 @@ describe('UserController', () => {
    * This test validates that the controller instance was created successfully.
    */
   it('should be defined', () => {
-    // Assertion to check if controller is defined
     expect(controller).toBeDefined();
   });
 
@@ -155,9 +115,9 @@ describe('UserController', () => {
       const result = await controller.changeUserData(data);
 
       expect(result).toBe(true);
-      expect(testUser.name).toBe(data.name);
-      expect(testUser.email).toBe(data.email);
-      expect(testUser.organization).toBe(data.organization);
+      expect(TEST_USER.name).toBe(data.name);
+      expect(TEST_USER.email).toBe(data.email);
+      expect(TEST_USER.organization).toBe(data.organization);
     });
 
     it('should throw an error if the user is not found', async () => {
