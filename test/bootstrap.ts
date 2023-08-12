@@ -22,7 +22,6 @@ export class Bootstrap {
    * Initialize the application.
    */
   public async init(): Promise<INestApplication> {
-    jest.setTimeout(30000);
     this.module = await Test.createTestingModule({
       imports: [
         AppModule,
