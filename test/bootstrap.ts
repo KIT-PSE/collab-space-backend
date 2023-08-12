@@ -3,8 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication } from '@nestjs/common';
 import mikroOrmConfig from '../src/mikro-orm.config';
-import { UserModule } from '../src/user/user.module';
-import { AuthModule } from '../src/auth/auth.module';
 import { User } from '../src/user/user.entity';
 import { EntityManager, MikroORM } from '@mikro-orm/core';
 import * as bcrypt from 'bcrypt';
@@ -30,6 +28,11 @@ export class Bootstrap {
         MikroOrmModule.forRoot({
           ...mikroOrmConfig,
           dbName: 'collab_space_test',
+          migrations: {
+            ...mikroOrmConfig.migrations,
+            silent: true,
+            transactional: false,
+          },
         }),
       ],
     }).compile();
