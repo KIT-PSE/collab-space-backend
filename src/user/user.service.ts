@@ -94,6 +94,7 @@ export class UserService {
     if (!user) {
       throw new Error('User not found');
     }
+
     return this.repository.nativeDelete({ id });
   }
 
@@ -104,6 +105,11 @@ export class UserService {
    */
   public async changeUserData(data: EditUser): Promise<boolean> {
     const user = await this.findOne(data.id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     user.name = data.name;
     user.email = data.email;
     user.organization = data.organization;

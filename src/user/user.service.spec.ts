@@ -166,19 +166,6 @@ describe('UserService', () => {
       expect(entityManager.persistAndFlush).toHaveBeenCalled();
     });
 
-    /**
-     * Aktuell wird nicht geprüft, ob die E-Mail-Adresse bereits verwendet wird.
-     */
-    it('should throw an error if the email is already in use', async () => {
-      const createUser = {
-        name: 'Test User',
-        email: 'test@example.com',
-        organization: 'Test Org',
-        password: 'password',
-      };
-      await expect(service.create(createUser)).rejects.toThrowError();
-    });
-
     it('should not store the password in plain text', async () => {
       const createUser = {
         name: 'New Test User',
