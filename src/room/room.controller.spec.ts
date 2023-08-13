@@ -22,7 +22,7 @@ const TEST_USER = {
   createdAt: new Date(),
   updatedAt: new Date(),
   role: 'user',
-} as unknown as User;
+} as User;
 
 const TEST_CATEGORY = {
   id: 1,
@@ -30,7 +30,7 @@ const TEST_CATEGORY = {
   owner: TEST_USER,
   createdAt: new Date(),
   updatedAt: new Date(),
-} as unknown as Category;
+} as Category;
 
 const TEST_ROOM = {
   id: 1,

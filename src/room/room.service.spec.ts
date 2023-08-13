@@ -13,7 +13,7 @@ const TEST_CATEGORY = {
   name: 'Category 1',
   createdAt: new Date(),
   updatedAt: new Date(),
-} as unknown as Category;
+} as Category;
 
 const TEST_ROOM = {
   id: 1,
