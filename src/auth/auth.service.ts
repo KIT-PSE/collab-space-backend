@@ -28,11 +28,15 @@ export class AuthService {
    */
   public async login({ email, password }: LoginUser): Promise<AuthPayload> {
     const user = await this.users.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     return this.createToken(user);
   }
 
@@ -56,8 +60,8 @@ export class AuthService {
    * @param id - ID of the user to be deleted.
    * @returns Resolves when deletion is successful.
    */
-  public async delete(id: number): Promise<void> {
-    return await this.users.delete(id);
+  public async delete(id: number): Promise<number> {
+    return this.users.delete(id);
   }
 
   /**
