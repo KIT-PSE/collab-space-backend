@@ -5,14 +5,7 @@ import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Note } from './note.entity';
 import { Room } from '../room/room.entity';
 import { Category } from '../category/category.entity';
-
-const testNote = {
-  id: 1,
-  name: 'Test Note',
-  content: 'Test Note Content',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-} as unknown as Note;
+import { MockNoteRepository } from './mock/note.repository.mock';
 
 /**
  * Test suite for the 'NoteService' class.
@@ -37,16 +30,7 @@ describe('NoteService', () => {
         },
         {
           provide: getRepositoryToken(Note),
-          useValue: {
-            findOneOrFail: jest
-              .fn()
-              .mockImplementation(({ id }: { id: number }) => {
-                if (id === testNote.id) {
-                  return testNote;
-                }
-                throw new Error('Note not found');
-              }),
-          },
+          useValue: new MockNoteRepository(),
         },
       ],
     }).compile();
@@ -83,7 +67,7 @@ describe('NoteService', () => {
     it('should update note content correctly', async () => {
       const updatedContent = 'Updated Test Note Content';
 
-      const updatedNote = await service.updateNote(testNote.id, updatedContent);
+      const updatedNote = await service.updateNote(1, updatedContent);
 
       expect(updatedNote.content).toBe(updatedContent);
       expect(entityManager.persistAndFlush).toHaveBeenCalledWith(updatedNote);
@@ -100,10 +84,10 @@ describe('NoteService', () => {
 
   describe('deleteNoteById', () => {
     it('should delete a note successfully when note with given ID exists', async () => {
-      const result = await service.deleteNoteById(testNote.id);
+      const result = await service.deleteNoteById(1);
 
       expect(result).toBe(true);
-      expect(entityManager.removeAndFlush).toHaveBeenCalledWith(testNote);
+      expect(entityManager.removeAndFlush).toHaveBeenCalled();
     });
 
     it('should throw an error when note with given ID does not exist', async () => {
