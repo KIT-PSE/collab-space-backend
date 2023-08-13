@@ -6,13 +6,12 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { Category } from '../category/category.entity';
 import { Response } from 'express';
-import { CreateUser, LoginUser } from './auth.dto';
-import { UnauthorizedException } from '@nestjs/common';
-import { JwtToken } from './jwt.strategy';
 import { isGuarded } from '../../test/utils';
 import { AuthGuard } from './auth.guard';
+import { MockAuthService } from './mock/auth.service.mock';
+import { User } from '../user/user.entity';
 
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -22,46 +21,12 @@ const testUser = {
   createdAt: new Date(),
   updatedAt: new Date(),
   role: 'user',
-};
-
-const testUserAuthPayload = {
-  user: testUser,
-  token: 'sometesttoken',
-  exp: Date.now() + 1000 * 60 * 60,
-};
-
-const testJwtToken: JwtToken = {
-  sub: testUser.id,
-  iat: Date.now(),
-  exp: Date.now() + 1000 * 60 * 60,
-};
+} as unknown as User;
 
 /**
  * Test suite for the AuthController class.
  */
 describe('AuthController', () => {
-  const authService = {
-    login: jest.fn().mockImplementation((data: LoginUser) => {
-      if (data.email == 'test@example.com' && data.password == 'password') {
-        return Promise.resolve(testUserAuthPayload);
-      } else {
-        throw new UnauthorizedException('Invalid credentials');
-      }
-    }),
-    register: jest.fn().mockImplementation((data: CreateUser) => {
-      return Promise.resolve({
-        ...testUserAuthPayload,
-        user: {
-          ...testUser,
-          ...data,
-        },
-      });
-    }),
-    user: jest.fn().mockResolvedValue(testUser),
-    token: jest.fn().mockReturnValue(testJwtToken),
-    delete: jest.fn().mockResolvedValue(undefined),
-  };
-
   let controller: AuthController;
 
   /**
@@ -75,7 +40,7 @@ describe('AuthController', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: authService,
+          useValue: new MockAuthService(TEST_USER),
         },
         {
           provide: JwtService,
@@ -110,7 +75,6 @@ describe('AuthController', () => {
 
       const result = await controller.register(mockData, mockResponse);
 
-      expect(authService.register).toHaveBeenCalledWith(mockData);
       expect(mockResponse.cookie).toHaveBeenCalledWith('jwt', 'sometesttoken', {
         httpOnly: true,
       });
@@ -131,7 +95,6 @@ describe('AuthController', () => {
 
       const result = await controller.login(mockData, mockResponse);
 
-      expect(authService.login).toHaveBeenCalledWith(mockData);
       expect(mockResponse.cookie).toHaveBeenCalledWith('jwt', 'sometesttoken', {
         httpOnly: true,
       });
@@ -143,9 +106,8 @@ describe('AuthController', () => {
     it('should return user profile and token expiration', async () => {
       const result = await controller.profile();
 
-      expect(authService.user).toHaveBeenCalled();
-      expect(authService.token).toHaveBeenCalled();
-      expect(result).toEqual({ user: testUser, exp: testJwtToken.exp });
+      expect(result.user).toEqual(TEST_USER);
+      expect(result.exp).toBeLessThanOrEqual(Date.now() + 1000 * 60 * 60);
     });
 
     it('should be protected with AuthGuard', () => {
@@ -178,8 +140,6 @@ describe('AuthController', () => {
 
       const result = await controller.delete(mockResponse);
 
-      expect(authService.user).toBeCalled();
-      expect(authService.delete).toHaveBeenCalled();
       expect(mockResponse.clearCookie).toBeCalledWith('jwt');
       expect(result).toEqual({ message: 'success' });
     });

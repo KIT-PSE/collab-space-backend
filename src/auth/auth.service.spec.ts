@@ -6,13 +6,14 @@ import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { JwtStrategy } from './jwt.strategy';
 import * as dotenv from 'dotenv';
-import { CreateUser } from './auth.dto';
 import { jwtModuleConfig } from './auth.module';
 import { Category } from '../category/category.entity';
+import { MockUserService } from '../user/mock/user.service.mock';
+import { User } from '../user/user.entity';
 
 dotenv.config();
 
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -22,33 +23,14 @@ const testUser = {
   createdAt: new Date(),
   updatedAt: new Date(),
   role: 'user',
-};
+} as unknown as User;
 
 /**
  * Test suite for the AuthService class.
  */
 describe('AuthService', () => {
-  const userService = {
-    findByEmail: jest.fn().mockImplementation((email: string) => {
-      return email === 'test@example.com'
-        ? Promise.resolve(testUser)
-        : Promise.resolve(null);
-    }),
-    findOne: jest.fn().mockImplementation((id: number) => {
-      return id === testUser.id
-        ? Promise.resolve(testUser)
-        : Promise.resolve(null);
-    }),
-    create: jest.fn().mockImplementation((data: CreateUser) => {
-      return Promise.resolve({
-        ...testUser,
-        ...data,
-      });
-    }),
-    delete: jest.fn(),
-  };
-
   let service: AuthService;
+  let userService: UserService;
 
   /**
    * Executes before each individual test case.
@@ -67,12 +49,12 @@ describe('AuthService', () => {
             return new JwtService(jwtModuleConfig);
           },
         },
-        { provide: UserService, useValue: userService },
+        { provide: UserService, useValue: new MockUserService(TEST_USER) },
         {
           provide: REQUEST,
           useValue: {
             user: {
-              sub: testUser.id,
+              sub: TEST_USER.id,
               exp: Date.now() + 1000 * 60 * 60,
               iat: Date.now(),
             },
@@ -82,6 +64,7 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    userService = module.get<UserService>(UserService);
   });
 
   /**
@@ -98,7 +81,7 @@ describe('AuthService', () => {
         password: 'password',
       });
 
-      expect(payload.user).toEqual(testUser);
+      expect(payload.user).toEqual(TEST_USER);
     });
 
     /**
@@ -139,6 +122,7 @@ describe('AuthService', () => {
 
   describe('delete', () => {
     it('should delete a user', async () => {
+      userService.delete = jest.fn();
       await service.delete(1);
       expect(userService.delete).toHaveBeenCalledWith(1);
     });
@@ -147,7 +131,7 @@ describe('AuthService', () => {
   describe('user', () => {
     it('should return the currently authenticated user', async () => {
       const user = await service.user();
-      expect(user).toEqual(testUser);
+      expect(user).toEqual(TEST_USER);
     });
   });
 
