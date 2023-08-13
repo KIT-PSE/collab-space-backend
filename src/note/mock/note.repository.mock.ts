@@ -9,7 +9,7 @@ export class MockNoteRepository {
         content: 'Test Note Content',
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as unknown as Note);
+      } as Note);
     }
     throw new Error('Note not found');
   }
