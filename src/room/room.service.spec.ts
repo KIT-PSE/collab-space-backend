@@ -6,19 +6,20 @@ import { Room } from './room.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Category } from '../category/category.entity';
 import { EntityRepository } from '@mikro-orm/mysql';
+import { MockRoomRepository } from './mock/room.repository.mock';
 
-const testCategory = {
+const TEST_CATEGORY = {
   id: 1,
   name: 'Category 1',
   createdAt: new Date(),
   updatedAt: new Date(),
 } as unknown as Category;
 
-const testRoom = {
+const TEST_ROOM = {
   id: 1,
   name: 'Room 1',
   password: 'password',
-  category: testCategory,
+  category: TEST_CATEGORY,
   createdAt: new Date(),
   updatedAt: new Date(),
   notes: [],
@@ -43,43 +44,12 @@ describe('RoomService', () => {
         {
           provide: EntityManager,
           useValue: {
-            persistAndFlush: jest.fn().mockResolvedValue(undefined),
+            persistAndFlush: jest.fn(),
           },
         },
         {
           provide: getRepositoryToken(Room),
-          useValue: {
-            findOneOrFail: jest
-              .fn()
-              .mockImplementation(
-                ({ id, category }: { id: number; category: Category }) => {
-                  if (
-                    (id === 1 && category === undefined) ||
-                    (id === 1 && category === testRoom.category)
-                  ) {
-                    return Promise.resolve(testRoom);
-                  } else {
-                    throw new Error('Room not found');
-                  }
-                },
-              ),
-            findOne: jest.fn().mockImplementation(({ id }: { id: number }) => {
-              if (id === 1) {
-                return Promise.resolve(testRoom);
-              } else {
-                return Promise.resolve(null);
-              }
-            }),
-            nativeDelete: jest
-              .fn()
-              .mockImplementation(({ id }: { id: number }) => {
-                if (id === 1) {
-                  return Promise.resolve(testRoom);
-                } else {
-                  throw new Error('Room not found');
-                }
-              }),
-          },
+          useValue: new MockRoomRepository(TEST_CATEGORY, TEST_ROOM),
         },
         EventEmitter2,
       ],
@@ -100,8 +70,8 @@ describe('RoomService', () => {
 
   describe('get', () => {
     it('should return the room if it exists and matches the category', async () => {
-      const result = await service.get(1, testCategory);
-      expect(result).toEqual(testRoom);
+      const result = await service.get(1, TEST_CATEGORY);
+      expect(result).toEqual(TEST_ROOM);
     });
 
     it('should throw an error if the room does not exist or does not match the category', async () => {
@@ -115,41 +85,37 @@ describe('RoomService', () => {
 
   describe('findOneWithCategory', () => {
     it('should return the room with its associated category if found', async () => {
+      const spy = jest.spyOn(repository, 'findOne');
       const result = await service.findOneWithCategory(1);
 
-      expect(result).toEqual(testRoom);
-      expect(repository.findOne).toHaveBeenCalledWith(
-        { id: 1 },
-        { populate: ['category'] },
-      );
+      expect(result).toEqual(TEST_ROOM);
+      expect(spy).toHaveBeenCalledWith({ id: 1 }, { populate: ['category'] });
     });
 
     it('should return null if the room is not found', async () => {
+      const spy = jest.spyOn(repository, 'findOne');
       const result = await service.findOneWithCategory(2);
 
       expect(result).toBeNull();
-      expect(repository.findOne).toHaveBeenCalledWith(
-        { id: 2 },
-        { populate: ['category'] },
-      );
+      expect(spy).toHaveBeenCalledWith({ id: 2 }, { populate: ['category'] });
     });
   });
 
   describe('create', () => {
     it('should persist and return the created room', async () => {
-      const result = await service.create('Room 1', testCategory, 'password');
+      const result = await service.create('Room 1', TEST_CATEGORY, 'password');
 
       expect(result).toEqual(
         expect.objectContaining({
           name: 'Room 1',
-          category: testCategory,
+          category: TEST_CATEGORY,
           password: 'password',
         }),
       );
       expect(entityManager.persistAndFlush).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Room 1',
-          category: testCategory,
+          category: TEST_CATEGORY,
           password: 'password',
         }),
       );
@@ -159,11 +125,11 @@ describe('RoomService', () => {
   describe('update', () => {
     it('should successfully update the room name and return the updated room', async () => {
       const updatedName = 'Updated Room';
-      const result = await service.update(1, testCategory, updatedName);
+      const result = await service.update(1, TEST_CATEGORY, updatedName);
 
-      expect(result).toEqual(testRoom);
-      expect(testRoom.name).toBe(updatedName);
-      expect(entityManager.persistAndFlush).toHaveBeenCalledWith(testRoom);
+      expect(result).toEqual(TEST_ROOM);
+      expect(TEST_ROOM.name).toBe(updatedName);
+      expect(entityManager.persistAndFlush).toHaveBeenCalledWith(TEST_ROOM);
     });
 
     it('should throw an error if the room does not exist or does not match the category', async () => {
@@ -181,7 +147,7 @@ describe('RoomService', () => {
 
       // Case: Room doesn't exist
       await expect(
-        service.update(2, testCategory, updatedName),
+        service.update(2, TEST_CATEGORY, updatedName),
       ).rejects.toThrow('Room not found');
     });
   });
@@ -194,12 +160,13 @@ describe('RoomService', () => {
     });
 
     it('should delete the room if it exists and matches the category', async () => {
-      await service.delete(1, testCategory);
+      const spy = jest.spyOn(repository, 'nativeDelete');
+      await service.delete(1, TEST_CATEGORY);
 
-      expect(repository.nativeDelete).toHaveBeenCalledWith({ id: 1 });
+      expect(spy).toHaveBeenCalledWith({ id: 1 });
       expect(eventEmitterEmitSpy).toHaveBeenCalledWith(
         'room.deleted',
-        testRoom,
+        TEST_ROOM,
       );
     });
 
@@ -212,7 +179,7 @@ describe('RoomService', () => {
       await expect(service.delete(1, differentCategory)).rejects.toThrow(
         'Room not found',
       );
-      await expect(service.delete(2, testCategory)).rejects.toThrow(
+      await expect(service.delete(2, TEST_CATEGORY)).rejects.toThrow(
         'Room not found',
       );
 
@@ -225,16 +192,17 @@ describe('RoomService', () => {
 
   describe('getNotes', () => {
     it('should return the notes associated with a room', async () => {
+      const spy = jest.spyOn(repository, 'findOneOrFail');
       const testNotes = [
         { id: 1, content: 'Note 1' },
         { id: 2, content: 'Note 2' },
       ];
-      testRoom.notes.loadItems = jest.fn().mockResolvedValueOnce(testNotes);
+      TEST_ROOM.notes.loadItems = jest.fn().mockResolvedValueOnce(testNotes);
 
       const result = await service.getNotes(1);
 
       expect(result).toEqual(testNotes);
-      expect(repository.findOneOrFail).toHaveBeenCalledWith({ id: 1 });
+      expect(spy).toHaveBeenCalledWith({ id: 1 });
     });
 
     it('should throw an error if the room is not found', async () => {
@@ -248,9 +216,9 @@ describe('RoomService', () => {
     it('should update the whiteboard canvas of a room and return the updated room', async () => {
       const result = await service.updateWhiteboard(1, canvasData);
 
-      expect(result).toEqual(testRoom);
-      expect(testRoom.whiteboardCanvas).toEqual(canvasData);
-      expect(entityManager.persistAndFlush).toHaveBeenCalledWith(testRoom);
+      expect(result).toEqual(TEST_ROOM);
+      expect(TEST_ROOM.whiteboardCanvas).toEqual(canvasData);
+      expect(entityManager.persistAndFlush).toHaveBeenCalledWith(TEST_ROOM);
     });
 
     it('should throw an error if the room is not found', async () => {

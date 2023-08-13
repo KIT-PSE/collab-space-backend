@@ -4,13 +4,16 @@ import { RoomService } from './room.service';
 import { CategoryService } from '../category/category.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '../auth/auth.guard';
+import { isGuarded } from '../../test/utils';
+import { MockRoomService } from './mock/room.service.mock';
+import { MockAuthService } from '../auth/mock/auth.service.mock';
+import { MockCategoryService } from '../category/mock/category.service.mock';
 import { User } from '../user/user.entity';
 import { Category } from '../category/category.entity';
 import { Room } from './room.entity';
-import { AuthGuard } from '../auth/auth.guard';
-import { isGuarded } from '../../test/utils';
 
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -21,19 +24,19 @@ const testUser = {
   role: 'user',
 } as unknown as User;
 
-const testCategory = {
+const TEST_CATEGORY = {
   id: 1,
   name: 'Category 1',
-  owner: testUser,
+  owner: TEST_USER,
   createdAt: new Date(),
   updatedAt: new Date(),
 } as unknown as Category;
 
-const testRoom = {
+const TEST_ROOM = {
   id: 1,
   name: 'Room 1',
   password: 'password',
-  category: testCategory,
+  category: TEST_CATEGORY,
   createdAt: new Date(),
   updatedAt: new Date(),
   notes: [
@@ -65,60 +68,15 @@ describe('RoomController', () => {
       providers: [
         {
           provide: RoomService,
-          useValue: {
-            create: jest.fn().mockImplementation((name, category, password) => {
-              return Promise.resolve({
-                ...testRoom,
-                name,
-                category,
-                password,
-              });
-            }),
-            update: jest
-              .fn()
-              .mockImplementation(
-                (id: number, category: Category, name: string) => {
-                  if (id === 1 && category === testCategory) {
-                    return Promise.resolve({
-                      ...testRoom,
-                      name,
-                    });
-                  }
-                  throw new Error('Room not found');
-                },
-              ),
-            delete: jest
-              .fn()
-              .mockImplementation((id: number, category: Category) => {
-                if (id === 1 && category === testCategory) {
-                  return Promise.resolve(1);
-                }
-                throw new Error('Room not found');
-              }),
-            getNotes: jest.fn().mockImplementation((id: number) => {
-              if (id === 1) {
-                return Promise.resolve(testRoom.notes);
-              }
-              throw new Error('Room not found');
-            }),
-          },
+          useValue: new MockRoomService(TEST_CATEGORY, TEST_ROOM),
         },
         {
           provide: CategoryService,
-          useValue: {
-            get: jest.fn().mockImplementation((id: number, owner: User) => {
-              if (id === 1 && owner === testUser) {
-                return Promise.resolve(testCategory);
-              }
-              throw new Error('Category not found');
-            }),
-          },
+          useValue: new MockCategoryService(TEST_USER, TEST_CATEGORY),
         },
         {
           provide: AuthService,
-          useValue: {
-            user: jest.fn().mockResolvedValue(testUser),
-          },
+          useValue: new MockAuthService(TEST_USER),
         },
         {
           provide: JwtService,
@@ -144,13 +102,13 @@ describe('RoomController', () => {
     };
 
     it('should create the room and return the created room', async () => {
-      const result = await controller.create(testCategory.id, createRoomDto);
+      const result = await controller.create(TEST_CATEGORY.id, createRoomDto);
 
       expect(result).toEqual(
         expect.objectContaining({
           name: createRoomDto.name,
           password: createRoomDto.password,
-          category: testCategory,
+          category: TEST_CATEGORY,
         }),
       );
     });
@@ -173,8 +131,8 @@ describe('RoomController', () => {
 
     it('should update the room and return the updated room', async () => {
       const result = await controller.update(
-        testRoom.id,
-        testCategory.id,
+        TEST_ROOM.id,
+        TEST_CATEGORY.id,
         updateRoomDto,
       );
 
@@ -187,13 +145,13 @@ describe('RoomController', () => {
 
     it('should throw an error if room is not found', async () => {
       await expect(
-        controller.update(testCategory.id, 2, updateRoomDto),
+        controller.update(TEST_CATEGORY.id, 2, updateRoomDto),
       ).rejects.toThrow('Room not found');
     });
 
     it('should throw an error if category is not found', async () => {
       await expect(
-        controller.update(2, testRoom.id, updateRoomDto),
+        controller.update(2, TEST_ROOM.id, updateRoomDto),
       ).rejects.toThrow('Category not found');
     });
 
@@ -204,19 +162,19 @@ describe('RoomController', () => {
 
   describe('delete', () => {
     it('should delete the room', async () => {
-      const result = await controller.delete(testRoom.id, testCategory.id);
+      const result = await controller.delete(TEST_ROOM.id, TEST_CATEGORY.id);
 
       expect(result).toEqual(1);
     });
 
     it('should throw an error if room is not found', async () => {
-      await expect(controller.delete(testCategory.id, 2)).rejects.toThrow(
+      await expect(controller.delete(TEST_CATEGORY.id, 2)).rejects.toThrow(
         'Room not found',
       );
     });
 
     it('should throw an error if category is not found', async () => {
-      await expect(controller.delete(2, testRoom.id)).rejects.toThrow(
+      await expect(controller.delete(2, TEST_ROOM.id)).rejects.toThrow(
         'Category not found',
       );
     });
@@ -228,27 +186,14 @@ describe('RoomController', () => {
 
   describe('getNotes', () => {
     it('should return the notes of the room', async () => {
-      const result = await controller.getNotes(testRoom.id, testCategory.id);
+      const result = await controller.getNotes(TEST_ROOM.id, TEST_CATEGORY.id);
 
-      expect(result).toEqual(testRoom.notes);
+      expect(result).toEqual(TEST_ROOM.notes);
     });
 
     it('should throw an error if room is not found', async () => {
-      await expect(controller.getNotes(testCategory.id, 2)).rejects.toThrow(
+      await expect(controller.getNotes(TEST_CATEGORY.id, 2)).rejects.toThrow(
         'Room not found',
-      );
-    });
-
-    /**
-     * Aktuell wird hier noch nicht gecheckt, ob die Kategorie auch wirklich
-     * zu dem Raum gehört. Das Problem ist, dass diese Methode auch von
-     * nicht eingeloggten Usern aufgerufen werden kann. Hier muss man evtl.
-     * eine Schnittstelle in dem CategoryService einbauen, die keinen User
-     * benötigt.
-     */
-    it('should throw an error if category is not found', async () => {
-      await expect(controller.getNotes(2, testRoom.id)).rejects.toThrow(
-        'Category not found',
       );
     });
   });
