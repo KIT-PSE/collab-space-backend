@@ -1,6 +1,9 @@
 import { defineConfig } from '@mikro-orm/mysql';
 import * as process from 'process';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * MikroORM configuration object for MySQL.
