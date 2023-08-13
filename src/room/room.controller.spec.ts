@@ -72,7 +72,7 @@ describe('RoomController', () => {
         },
         {
           provide: CategoryService,
-          useValue: new MockCategoryService(TEST_USER, TEST_CATEGORY),
+          useValue: new MockCategoryService([TEST_CATEGORY]),
         },
         {
           provide: AuthService,

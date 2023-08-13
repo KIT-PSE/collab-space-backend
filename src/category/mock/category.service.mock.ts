@@ -2,15 +2,14 @@ import { User } from '../../user/user.entity';
 import { Category } from '../category.entity';
 
 export class MockCategoryService {
-  constructor(
-    private readonly testUser: User,
-    private readonly testCategory: Category,
-  ) {}
+  constructor(private readonly testCategories: Category[]) {}
 
   public async get(id: number, owner: User) {
-    if (id === 1 && owner === this.testUser) {
-      return Promise.resolve(this.testCategory);
+    const category = this.testCategories.find((c) => c.id === id);
+    if (category && category.owner === owner) {
+      return Promise.resolve(category);
+    } else {
+      throw new Error('Category not found');
     }
-    throw new Error('Category not found');
   }
 }
