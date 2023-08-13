@@ -42,7 +42,6 @@ describe('AuthService', () => {
       imports: [],
       providers: [
         AuthService,
-        JwtStrategy,
         {
           provide: JwtService,
           useFactory: () => {

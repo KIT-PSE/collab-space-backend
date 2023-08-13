@@ -20,7 +20,6 @@ export class MockAuthService {
   constructor(private readonly testUser: User) {}
 
   public async login(data: LoginUser): Promise<AuthPayload> {
-    console.log(this.testUser.password);
     if (
       data.email == this.testUser.email &&
       bcrypt.compareSync(data.password, this.testUser.password)
