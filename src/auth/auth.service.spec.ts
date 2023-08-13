@@ -4,7 +4,6 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
-import { JwtStrategy } from './jwt.strategy';
 import * as dotenv from 'dotenv';
 import { jwtModuleConfig } from './auth.module';
 import { Category } from '../category/category.entity';
