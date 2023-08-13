@@ -9,6 +9,7 @@ import { Category } from './category.entity';
 import { Room } from '../room/room.entity';
 import { User } from '../user/user.entity';
 import { MockCategoryService } from './mock/category.service.mock';
+import { MockAuthService } from '../auth/mock/auth.service.mock';
 
 const CATEGORIES = [];
 const TEST_USER = {
@@ -45,9 +46,7 @@ describe('CategoryController', () => {
         },
         {
           provide: AuthService,
-          useValue: {
-            user: jest.fn().mockResolvedValue(TEST_USER),
-          },
+          useValue: new MockAuthService(TEST_USER),
         },
         {
           provide: JwtService,

@@ -28,7 +28,7 @@ export class AuthController {
    * @param response - Express response object to set cookies.
    * @returns The registration payload.
    */
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @Post('register')
   public async register(
     @Body() data: RegisterUser,
