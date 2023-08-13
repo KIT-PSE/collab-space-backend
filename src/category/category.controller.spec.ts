@@ -8,15 +8,16 @@ import { AuthGuard } from '../auth/auth.guard';
 import { Category } from './category.entity';
 import { Room } from '../room/room.entity';
 import { User } from '../user/user.entity';
+import { MockCategoryService } from './mock/category.service.mock';
 
-const categories = [];
-const testUser = {
+const CATEGORIES = [];
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
   organization: 'Test Organization',
   categories: {
-    loadItems: jest.fn().mockResolvedValue(categories),
+    loadItems: jest.fn().mockResolvedValue(CATEGORIES),
   },
   password: 'password',
   createdAt: new Date(),
@@ -25,8 +26,9 @@ const testUser = {
 } as unknown as User;
 
 for (let i = 0; i < 5; i++) {
-  categories.push(new Category(`Category ${i}`, testUser));
-  categories[i].rooms = [new Room(`Room ${i}`, categories[i])];
+  CATEGORIES.push(new Category(`Category ${i}`, TEST_USER));
+  CATEGORIES[i].id = i + 1;
+  CATEGORIES[i].rooms = [new Room(`Room ${i}`, CATEGORIES[i])];
 }
 
 describe('CategoryController', () => {
@@ -39,37 +41,12 @@ describe('CategoryController', () => {
       providers: [
         {
           provide: CategoryService,
-          useValue: {
-            allFromUser: jest.fn().mockImplementation((user) => {
-              if (user.id === 1) {
-                return Promise.resolve(categories);
-              }
-              return Promise.resolve([]);
-            }),
-            create: jest
-              .fn()
-              .mockImplementation((name: string, owner: User) => {
-                const category = new Category(name, owner);
-                return Promise.resolve(category);
-              }),
-            update: jest
-              .fn()
-              .mockImplementation((id: number, owner: User, name: string) => {
-                const category = categories.find((c) => c.id === id);
-                if (category && category.owner === owner) {
-                  category.name = name;
-                  return Promise.resolve(category);
-                } else {
-                  throw new Error('Category not found');
-                }
-              }),
-            delete: jest.fn(),
-          },
+          useValue: new MockCategoryService(CATEGORIES),
         },
         {
           provide: AuthService,
           useValue: {
-            user: jest.fn().mockResolvedValue(testUser),
+            user: jest.fn().mockResolvedValue(TEST_USER),
           },
         },
         {
@@ -97,7 +74,7 @@ describe('CategoryController', () => {
 
   describe('index', () => {
     it('should return all categories of the current user', async () => {
-      expect(await controller.index()).toEqual(categories);
+      expect(await controller.index()).toEqual(CATEGORIES);
     });
   });
 
@@ -109,7 +86,7 @@ describe('CategoryController', () => {
 
       expect(category).toBeDefined();
       expect(category.name).toBe('Test Category');
-      expect(category.owner).toBe(testUser);
+      expect(category.owner).toBe(TEST_USER);
     });
   });
 
@@ -143,6 +120,28 @@ describe('CategoryController', () => {
           name: 'Updated Category',
         }),
       ).rejects.toThrow();
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete a category', async () => {
+      await controller.delete(1);
+
+      expect(CATEGORIES.length).toBe(4);
+    });
+
+    it('should throw an error if the id does not exist', async () => {
+      await expect(controller.delete(6)).rejects.toThrow();
+    });
+
+    it('should throw an error if the category does not belong to the user', async () => {
+      jest.spyOn(authService, 'user').mockResolvedValueOnce({
+        id: 2,
+        name: 'Test User 2',
+        email: 'test2@example.com',
+      } as unknown as User);
+
+      await expect(controller.delete(1)).rejects.toThrow();
     });
   });
 });

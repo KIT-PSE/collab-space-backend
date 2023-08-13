@@ -6,20 +6,20 @@ import { EntityManager } from '@mikro-orm/core';
 import { ChannelService } from '../channel/channel.service';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
+import { MockCategoryRepository } from './mock/category.repository.mock';
 
-const categories = [];
+const CATEGORIES = [];
 for (let i = 0; i < 5; i++) {
-  categories.push(new Category(`Category ${i}`, undefined));
-  categories[i].rooms = [new Room(`Room ${i}`, categories[i])];
+  CATEGORIES.push(new Category(`Category ${i}`, undefined));
+  CATEGORIES[i].rooms = [new Room(`Room ${i}`, CATEGORIES[i])];
 }
-
-const testUser = {
+const TEST_USER = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
   organization: 'Test Organization',
   categories: {
-    loadItems: jest.fn().mockResolvedValue(categories),
+    loadItems: jest.fn().mockResolvedValue(CATEGORIES),
   },
   password: 'password',
   createdAt: new Date(),
@@ -52,22 +52,7 @@ describe('CategoryService', () => {
         },
         {
           provide: getRepositoryToken(Category),
-          useValue: {
-            findOneOrFail: jest.fn().mockImplementation((data) => {
-              if (data.id === 1) {
-                return Promise.resolve({
-                  id: 1,
-                  name: 'Test Category',
-                  owner: testUser,
-                  rooms: [],
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                });
-              } else {
-                throw new Error('Category not found');
-              }
-            }),
-          },
+          useValue: new MockCategoryRepository(TEST_USER),
         },
         {
           provide: ChannelService,
@@ -92,9 +77,9 @@ describe('CategoryService', () => {
 
   describe('allFromUser', () => {
     it('should return all categories for a user', async () => {
-      const categories = await service.allFromUser(testUser);
+      const categories = await service.allFromUser(TEST_USER);
 
-      expect(testUser.categories.loadItems).toBeCalledWith({
+      expect(TEST_USER.categories.loadItems).toBeCalledWith({
         populate: ['rooms'],
       });
       expect(channels.getChannelFromRoom).toHaveBeenCalledTimes(5);
@@ -104,31 +89,31 @@ describe('CategoryService', () => {
 
   describe('get', () => {
     it('should return a category', async () => {
-      const category = await service.get(1, testUser);
+      const category = await service.get(1, TEST_USER);
 
       expect(category).toBeDefined();
       expect(category.id).toBe(1);
     });
 
     it('should throw an error if the category does not exist', async () => {
-      await expect(service.get(2, testUser)).rejects.toThrow();
+      await expect(service.get(2, TEST_USER)).rejects.toThrow();
     });
   });
 
   describe('create', () => {
     it('should create a category', async () => {
-      const category = await service.create('Test Category', testUser);
+      const category = await service.create('Test Category', TEST_USER);
 
       expect(category).toBeDefined();
       expect(category.name).toBe('Test Category');
-      expect(category.owner).toBe(testUser);
+      expect(category.owner).toBe(TEST_USER);
       expect(entityManager.persistAndFlush).toBeCalledTimes(1);
     });
   });
 
   describe('update', () => {
     it('should update a category', async () => {
-      const category = await service.update(1, testUser, 'Updated Name');
+      const category = await service.update(1, TEST_USER, 'Updated Name');
 
       expect(category).toBeDefined();
       expect(category.name).toBe('Updated Name');
@@ -137,20 +122,20 @@ describe('CategoryService', () => {
 
     it('should throw an error if the category does not exist', async () => {
       await expect(
-        service.update(2, testUser, 'Updated Name'),
+        service.update(2, TEST_USER, 'Updated Name'),
       ).rejects.toThrow();
     });
   });
 
   describe('delete', () => {
     it('should delete a category', async () => {
-      await service.delete(1, testUser);
+      await service.delete(1, TEST_USER);
 
       expect(entityManager.removeAndFlush).toBeCalledTimes(1);
     });
 
     it('should throw an error if the category does not exist', async () => {
-      await expect(service.delete(2, testUser)).rejects.toThrow();
+      await expect(service.delete(2, TEST_USER)).rejects.toThrow();
     });
   });
 });
