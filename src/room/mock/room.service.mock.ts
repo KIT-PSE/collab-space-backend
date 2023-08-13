@@ -1,4 +1,3 @@
-import { User } from '../../user/user.entity';
 import { Category } from '../../category/category.entity';
 import { Room } from '../room.entity';
 
