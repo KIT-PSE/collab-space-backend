@@ -60,7 +60,7 @@ export class RoomController {
   ) {
     const user = await this.auth.user();
     const category = await this.categories.get(categoryId, user);
-    return this.rooms.update(roomId, category, data.name);
+    return this.rooms.update(roomId, category, data.name, data.password);
   }
 
   /**

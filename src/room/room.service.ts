@@ -61,16 +61,19 @@ export class RoomService {
    * @param id - The ID of the room.
    * @param category - The category of the room.
    * @param name - The new name for the room.
+   * @param password - The optional password for the room.
    * @returns The updated room.
    */
   public async update(
     id: number,
     category: Category,
     name: string,
+    password?: string,
   ): Promise<Room> {
     const room = await this.get(id, category);
 
     room.name = name;
+    room.password = password;
 
     await this.em.persistAndFlush(room);
 
