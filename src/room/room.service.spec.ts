@@ -125,10 +125,17 @@ describe('RoomService', () => {
   describe('update', () => {
     it('should successfully update the room name and return the updated room', async () => {
       const updatedName = 'Updated Room';
-      const result = await service.update(1, TEST_CATEGORY, updatedName);
+      const updatedPassword = 'new-password';
+      const result = await service.update(
+        1,
+        TEST_CATEGORY,
+        updatedName,
+        updatedPassword,
+      );
 
       expect(result).toEqual(TEST_ROOM);
       expect(TEST_ROOM.name).toBe(updatedName);
+      expect(TEST_ROOM.password).toBe(updatedPassword);
       expect(entityManager.persistAndFlush).toHaveBeenCalledWith(TEST_ROOM);
     });
 

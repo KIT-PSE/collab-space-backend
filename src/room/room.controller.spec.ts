@@ -127,6 +127,7 @@ describe('RoomController', () => {
   describe('update', () => {
     const updateRoomDto = {
       name: 'Updated Room',
+      password: 'new-password',
     };
 
     it('should update the room and return the updated room', async () => {
@@ -139,6 +140,7 @@ describe('RoomController', () => {
       expect(result).toEqual(
         expect.objectContaining({
           name: updateRoomDto.name,
+          password: updateRoomDto.password,
         }),
       );
     });

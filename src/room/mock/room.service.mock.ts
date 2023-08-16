@@ -20,11 +20,17 @@ export class MockRoomService {
     });
   }
 
-  public async update(id: number, category: Category, name: string) {
+  public async update(
+    id: number,
+    category: Category,
+    name: string,
+    password?: string,
+  ) {
     if (id === 1 && category === this.testCategory) {
       return Promise.resolve({
         ...this.testRoom,
         name,
+        password,
       });
     }
     throw new Error('Room not found');

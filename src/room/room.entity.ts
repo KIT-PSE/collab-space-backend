@@ -21,7 +21,7 @@ export class Room {
   @Property()
   name: string;
 
-  @Property({ hidden: true })
+  @Property()
   password?: string;
 
   @ManyToOne({ onDelete: 'cascade' })
