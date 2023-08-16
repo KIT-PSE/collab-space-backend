@@ -65,6 +65,17 @@ export class BrowserGateway {
     return true;
   }
 
+  @SubscribeMessage('close-browser')
+  @UseRequestContext()
+  public async closeBrowser(@ConnectedSocket() client: Socket) {
+    const channel = await this.channels.fromClientOrFail(client);
+
+    await this.browserService.closeBrowserContext(channel.id);
+    this.server.to(channel.id).emit('close-browser');
+
+    return true;
+  }
+
   /**
    * Handles the "move-mouse" event, allowing a client to move the mouse in the browser.
    *
