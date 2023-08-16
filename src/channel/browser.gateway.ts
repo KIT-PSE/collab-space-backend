@@ -65,6 +65,12 @@ export class BrowserGateway {
     return true;
   }
 
+  /**
+   * Handles the "close-browser" event, allowing a client to close the browser.
+   *
+   * @param client - The connected socket client.
+   * @returns A boolean indicating the success of closing the browser.
+   */
   @SubscribeMessage('close-browser')
   @UseRequestContext()
   public async closeBrowser(@ConnectedSocket() client: Socket) {
