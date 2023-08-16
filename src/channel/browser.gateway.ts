@@ -66,6 +66,23 @@ export class BrowserGateway {
   }
 
   /**
+   * Handles the "close-browser" event, allowing a client to close the browser.
+   *
+   * @param client - The connected socket client.
+   * @returns A boolean indicating the success of closing the browser.
+   */
+  @SubscribeMessage('close-browser')
+  @UseRequestContext()
+  public async closeBrowser(@ConnectedSocket() client: Socket) {
+    const channel = await this.channels.fromClientOrFail(client);
+
+    await this.browserService.closeBrowserContext(channel.id);
+    this.server.to(channel.id).emit('close-browser');
+
+    return true;
+  }
+
+  /**
    * Handles the "move-mouse" event, allowing a client to move the mouse in the browser.
    *
    * @param client - The connected socket client.
