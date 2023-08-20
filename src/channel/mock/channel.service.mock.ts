@@ -33,7 +33,7 @@ export class MockChannelService {
     return channelId === '123456';
   }
 
-  private async joinAsStudent(
+  public async joinAsStudent(
     client: Socket,
     channelId: string,
     name: string,
@@ -49,6 +49,22 @@ export class MockChannelService {
       throw new WsException('Wrong password');
     }
     await this.testChannel.joinAsStudent(client, name);
+
+    return this.testChannel;
+  }
+
+  public async joinAsTeacher(
+    client: Socket,
+    channelId: string,
+    userId: number,
+  ) {
+    if (channelId !== '123456') {
+      throw new WsException('Channel not found');
+    }
+    if (userId !== this.testUser.id) {
+      throw new WsException('User not found');
+    }
+    await this.testChannel.joinAsTeacher(client, this.testUser);
 
     return this.testChannel;
   }

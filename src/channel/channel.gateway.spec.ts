@@ -115,6 +115,52 @@ describe('ChannelGateway', () => {
       });
 
       expect(channelState).toBeDefined();
+      expect(channelState).toHaveProperty('students');
+    });
+
+    it('should throw an error if the channel is not found', async () => {
+      const result = await gateway.joinChannelAsStudent(TEST_CLIENT, {
+        name: 'Test Student',
+        channelId: '654321',
+        password: 'room-password',
+      });
+
+      expect(result).toHaveProperty('error');
+    });
+
+    it('should throw an error if the password is incorrect', async () => {
+      const result = await gateway.joinChannelAsStudent(TEST_CLIENT, {
+        name: 'Test Student',
+        channelId: '123456',
+        password: 'wrong-password',
+      });
+
+      expect(result).toHaveProperty('error');
+    });
+  });
+
+  describe('joinChannelAsTeacher', () => {
+    it('should join a channel as a teacher', async () => {
+      const channelState = await gateway.joinChannelAsTeacher(TEST_CLIENT, {
+        channelId: '123456',
+        userId: TEST_USER.id,
+      });
+
+      expect(channelState).toBeDefined();
+      expect(channelState).toMatchObject({
+        teacher: {
+          user: TEST_USER,
+        },
+      });
+    });
+
+    it('should throw an error if the channel is not found', async () => {
+      const result = await gateway.joinChannelAsTeacher(TEST_CLIENT, {
+        channelId: '654321',
+        userId: TEST_USER.id,
+      });
+
+      expect(result).toHaveProperty('error');
     });
   });
 });
