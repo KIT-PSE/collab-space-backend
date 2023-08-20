@@ -21,6 +21,8 @@ export class Browser {
    *
    * @param browser - The Puppeteer browser instance.
    * @param url - The initial URL to open.
+   * @param server - The Socket.IO server instance.
+   * @param channelId - The ID of the channel.
    */
   constructor(
     private browser: PuppeteerBrowser,
@@ -38,7 +40,7 @@ export class Browser {
     LOGGER.debug(`Opening page with url: ${this.url}`);
     this.page = await this.browser.newPage();
 
-    await installMouseHelper(this.page);
+    await this.installMouseHelper(this.page);
 
     await this.page.goto(this.url);
     await this.page.setViewport({ width: 1920, height: 1080 });
@@ -65,6 +67,7 @@ export class Browser {
 
     await this.page.bringToFront();
 
+    /* istanbul ignore next */
     const id = await extensionPage.evaluate(async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -167,25 +170,25 @@ export class Browser {
       await this.browser.close();
     }
   }
-}
 
-/**
- * Helper function to install mouse tracking for puppeteer pages.
- *
- * @param page - The puppeteer page to install the mouse tracking on.
- */
-async function installMouseHelper(page) {
-  await page.evaluateOnNewDocument(() => {
-    // Install mouse helper only for top-level frame.
-    if (window !== window.parent) {
-      return;
-    }
-    window.addEventListener(
-      'DOMContentLoaded',
-      () => {
-        const box = document.createElement('puppeteer-mouse-pointer');
-        const styleElement = document.createElement('style');
-        styleElement.innerHTML = `
+  /**
+   * Helper function to install mouse tracking for puppeteer pages.
+   *
+   * @param page - The puppeteer page to install the mouse tracking on.
+   */
+  private async installMouseHelper(page) {
+    await page.evaluateOnNewDocument(() => {
+      // Install mouse helper only for top-level frame.
+      if (window !== window.parent) {
+        return;
+      }
+      // istanbul ignore next
+      window.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          const box = document.createElement('puppeteer-mouse-pointer');
+          const styleElement = document.createElement('style');
+          styleElement.innerHTML = `
         puppeteer-mouse-pointer {
           pointer-events: none;
           position: absolute;
@@ -222,43 +225,44 @@ async function installMouseHelper(page) {
           border-color: rgba(0,255,0,0.9);
         }
       `;
-        document.head.appendChild(styleElement);
-        document.body.appendChild(box);
-        document.addEventListener(
-          'mousemove',
-          (event) => {
-            box.style.left = event.pageX + 'px';
-            box.style.top = event.pageY + 'px';
-            updateButtons(event.buttons);
-          },
-          true,
-        );
-        document.addEventListener(
-          'mousedown',
-          (event) => {
-            updateButtons(event.buttons);
-            box.classList.add('button-' + event.which);
-          },
-          true,
-        );
-        document.addEventListener(
-          'mouseup',
-          (event) => {
-            updateButtons(event.buttons);
-            box.classList.remove('button-' + event.which);
-          },
-          true,
-        );
+          document.head.appendChild(styleElement);
+          document.body.appendChild(box);
+          document.addEventListener(
+            'mousemove',
+            (event) => {
+              box.style.left = event.pageX + 'px';
+              box.style.top = event.pageY + 'px';
+              updateButtons(event.buttons);
+            },
+            true,
+          );
+          document.addEventListener(
+            'mousedown',
+            (event) => {
+              updateButtons(event.buttons);
+              box.classList.add('button-' + event.which);
+            },
+            true,
+          );
+          document.addEventListener(
+            'mouseup',
+            (event) => {
+              updateButtons(event.buttons);
+              box.classList.remove('button-' + event.which);
+            },
+            true,
+          );
 
-        function updateButtons(buttons) {
-          for (let i = 0; i < 5; i++) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            box.classList.toggle('button-' + i, buttons & (1 << i));
+          function updateButtons(buttons) {
+            for (let i = 0; i < 5; i++) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              box.classList.toggle('button-' + i, buttons & (1 << i));
+            }
           }
-        }
-      },
-      false,
-    );
-  });
+        },
+        false,
+      );
+    });
+  }
 }
