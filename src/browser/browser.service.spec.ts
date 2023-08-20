@@ -33,7 +33,7 @@ describe('BrowserService', () => {
       const server = {
         to: () => {
           return {
-            emit: () => {},
+            emit: jest.fn(),
           };
         },
       } as unknown as Server;
@@ -51,7 +51,7 @@ describe('BrowserService', () => {
       const server = {
         to: () => {
           return {
-            emit: () => undefined,
+            emit: jest.fn(),
           };
         },
       } as unknown as Server;
@@ -78,7 +78,7 @@ describe('BrowserService', () => {
       const server = {
         to: () => {
           return {
-            emit: () => undefined,
+            emit: jest.fn(),
           };
         },
       } as unknown as Server;
@@ -102,7 +102,7 @@ describe('BrowserService', () => {
       const server = {
         to: () => {
           return {
-            emit: () => undefined,
+            emit: jest.fn(),
           };
         },
       } as unknown as Server;
