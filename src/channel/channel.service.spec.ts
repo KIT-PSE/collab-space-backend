@@ -420,12 +420,7 @@ describe('ChannelService', () => {
     });
 
     it('should throw an exception if the client is not in the channel', async () => {
-      const channel = await service.open(
-        TEST_CLIENT,
-        MOCK_SERVER,
-        TEST_USER.id,
-        TEST_ROOM.id,
-      );
+      await service.open(TEST_CLIENT, MOCK_SERVER, TEST_USER.id, TEST_ROOM.id);
 
       await expect(
         service.getOtherClient(TEST_CLIENT, OTHER_CLIENT.id),
@@ -435,12 +430,7 @@ describe('ChannelService', () => {
 
   describe('getChannelFromRoom', () => {
     it('should return a channel if it exists', async () => {
-      const channel = await service.open(
-        TEST_CLIENT,
-        MOCK_SERVER,
-        TEST_USER.id,
-        TEST_ROOM.id,
-      );
+      await service.open(TEST_CLIENT, MOCK_SERVER, TEST_USER.id, TEST_ROOM.id);
       expect(service.getChannelFromRoom(TEST_ROOM)).toBeDefined();
     });
 

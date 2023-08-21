@@ -57,7 +57,7 @@ export class MockRoomService {
     throw new Error('Room not found');
   }
 
-  public updateWhiteboard(id: number, whiteboard: string) {
+  public updateWhiteboard() {
     return Promise.resolve();
   }
 }
