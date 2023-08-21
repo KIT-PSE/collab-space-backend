@@ -49,4 +49,15 @@ export class MockRoomService {
     }
     throw new Error('Room not found');
   }
+
+  public async findOneWithCategory(id: number) {
+    if (id === this.testRoom.id) {
+      return Promise.resolve(this.testRoom);
+    }
+    throw new Error('Room not found');
+  }
+
+  public updateWhiteboard(id: number, whiteboard: string) {
+    return Promise.resolve();
+  }
 }

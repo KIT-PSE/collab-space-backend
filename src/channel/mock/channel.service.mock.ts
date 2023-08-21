@@ -5,11 +5,15 @@ import { Server, Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
 
 export class MockChannelService {
+  private testChannels: Channel[] = [];
   constructor(
     private readonly testUser: User,
     private readonly testRoom: Room,
     private readonly testChannel: Channel,
-  ) {}
+    private readonly otherClient: Socket,
+  ) {
+    this.testChannels[this.testChannel.id] = this.testChannel;
+  }
 
   public async open(
     client: Socket,
@@ -30,7 +34,7 @@ export class MockChannelService {
   }
 
   public exists(channelId: string): boolean {
-    return channelId === '123456';
+    return this.testChannels.some((channel) => channel.id === channelId);
   }
 
   public async joinAsStudent(
@@ -67,5 +71,46 @@ export class MockChannelService {
     await this.testChannel.joinAsTeacher(client, this.testUser);
 
     return this.testChannel;
+  }
+
+  public async leave(client: Socket, channelId: string) {
+    if (channelId !== '123456') {
+      throw new WsException('Channel not found');
+    }
+    if (this.testChannel.teacher?.client.id === client.id) {
+      await this.testChannel.leaveAsTeacher(client);
+    } else {
+      await this.testChannel.leaveAsStudent(client);
+    }
+  }
+
+  public fromClientOrFail(client: Socket): Channel {
+    if (client.id === 'test' && client.rooms.has('123456')) {
+      return this.testChannel;
+    }
+    throw new WsException('Channel not found');
+  }
+
+  public async getOtherClient(
+    client: Socket,
+    otherId: string,
+  ): Promise<Socket> {
+    if (client.id === 'test' && otherId === this.otherClient.id) {
+      return this.otherClient;
+    }
+    throw new WsException('Channel not found');
+  }
+
+  public fromId(id: string): Channel {
+    if (!this.exists(id)) {
+      throw new WsException('Channel not found');
+    }
+
+    return this.testChannels[id];
+  }
+
+  public async close(channel: Channel) {
+    channel.close();
+    delete this.testChannels[channel.id];
   }
 }

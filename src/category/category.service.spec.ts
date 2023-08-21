@@ -7,6 +7,7 @@ import { ChannelService } from '../channel/channel.service';
 import { User } from '../user/user.entity';
 import { Room } from '../room/room.entity';
 import { MockCategoryRepository } from './mock/category.repository.mock';
+import { Channel } from '../channel/channel';
 
 const CATEGORIES = [];
 for (let i = 0; i < 5; i++) {
@@ -84,6 +85,15 @@ describe('CategoryService', () => {
       });
       expect(channels.getChannelFromRoom).toHaveBeenCalledTimes(5);
       expect(categories).toHaveLength(5);
+    });
+
+    it('should populate the channelId for a room', async () => {
+      jest.spyOn(channels, 'getChannelFromRoom').mockReturnValueOnce({
+        id: 1,
+      } as unknown as Channel);
+      const categories = await service.allFromUser(TEST_USER);
+
+      expect(categories[0].rooms[0].channelId).toBe(1);
     });
   });
 
