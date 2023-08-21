@@ -1,4 +1,4 @@
-import { BroadcastOperator, Server, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotesGateway } from './notes.gateway';
 import { NoteService } from '../note/note.service';
