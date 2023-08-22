@@ -118,6 +118,20 @@ describe('AuthService', () => {
     });
   });
 
+  describe('updateUser', () => {
+    it('should update the authenticated user', async () => {
+      const updatedUser = await service.updateUser({
+        name: 'New Test User',
+        organization: 'New Test Organization',
+        email: 'newmail@example.com',
+      });
+
+      expect(updatedUser.name).toEqual('New Test User');
+      expect(updatedUser.organization).toEqual('New Test Organization');
+      expect(updatedUser.email).toEqual('newmail@example.com');
+    });
+  });
+
   describe('delete', () => {
     it('should delete a user', async () => {
       userService.delete = jest.fn();

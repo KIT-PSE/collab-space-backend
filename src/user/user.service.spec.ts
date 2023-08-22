@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { MockUserRepository } from './mock/user.repository.mock';
+import { UpdateUser } from '../auth/auth.dto';
 
 const TEST_USER = {
   id: 1,
@@ -23,6 +24,7 @@ const TEST_USER = {
 describe('UserService', () => {
   let service: UserService;
   let entityManager: EntityManager;
+  let repository: MockUserRepository;
 
   /**
    * Before each test case, create a testing module and compile it.
@@ -47,6 +49,7 @@ describe('UserService', () => {
 
     service = module.get<UserService>(UserService);
     entityManager = module.get<EntityManager>(EntityManager);
+    repository = module.get<MockUserRepository>(getRepositoryToken(User));
   });
 
   /**
@@ -154,36 +157,52 @@ describe('UserService', () => {
     });
   });
 
-  describe('changeUserData', () => {
-    it('should change the user data', async () => {
-      const changeUserData = {
-        id: 1,
-        name: 'Updated Test User',
-        email: 'updatedmail@example.com',
-        organization: 'Updated Test Org',
-      };
-      const result = await service.changeUserData(changeUserData);
-
-      expect(TEST_USER.name).toEqual(changeUserData.name);
-      expect(TEST_USER.email).toEqual(changeUserData.email);
-      expect(TEST_USER.organization).toEqual(changeUserData.organization);
-      expect(entityManager.persistAndFlush).toHaveBeenCalled();
+  describe('isEmailTakenNotBy', () => {
+    it('should return true if the email is taken', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce({
+        ...TEST_USER,
+        email: 'test2@example.com',
+        id: 2,
+      });
+      const result = await service.isEmailTakenNotBy(
+        TEST_USER,
+        'test2@example.com',
+      );
       expect(result).toBeTruthy();
     });
 
-    /**
-     * Wird aktuell noch nicht abgefangen.
-     */
-    it('should throw an error if the user does not exist', async () => {
-      const changeUserData = {
-        id: 2,
+    it('should return false if the email is not taken', async () => {
+      const result = await service.isEmailTakenNotBy(
+        TEST_USER,
+        'nottaken@example.com',
+      );
+      expect(result).toBeFalsy();
+    });
+
+    it('should return false if the email is taken by the same user', async () => {
+      const result = await service.isEmailTakenNotBy(
+        TEST_USER,
+        'test@example.com',
+      );
+      expect(result).toBeFalsy();
+    });
+  });
+
+  describe('update', () => {
+    it('should change the user data', async () => {
+      const updateUser: UpdateUser = {
         name: 'Updated Test User',
         email: 'updatedmail@example.com',
         organization: 'Updated Test Org',
       };
-      await expect(service.changeUserData(changeUserData)).rejects.toThrowError(
-        'User not found',
-      );
+      const result = await service.update(TEST_USER, updateUser);
+
+      expect(TEST_USER.name).toEqual(updateUser.name);
+      expect(TEST_USER.email).toEqual(updateUser.email);
+      expect(TEST_USER.organization).toEqual(updateUser.organization);
+      expect(entityManager.persistAndFlush).toHaveBeenCalled();
+
+      expect(result).toEqual({ ...TEST_USER, ...updateUser });
     });
   });
 

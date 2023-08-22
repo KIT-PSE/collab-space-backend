@@ -1,5 +1,5 @@
 import { validate } from 'class-validator';
-import { RegisterUser } from './auth.dto';
+import { RegisterUser, UpdateUser } from './auth.dto';
 import { CreateUser } from './auth.dto';
 import { LoginUser } from './auth.dto';
 import { ChangePassword } from './auth.dto';
@@ -131,6 +131,61 @@ describe('LoginUser DTO', () => {
       loginUser.email = 'valid@email.com';
       loginUser.password = 'samplePassword';
       const errors = await validate(loginUser);
+      expect(errors).toHaveLength(0);
+    });
+  });
+});
+
+describe('UpdateUser DTO', () => {
+  let updateUser: UpdateUser;
+
+  beforeEach(() => {
+    updateUser = new UpdateUser();
+  });
+
+  describe('organization', () => {
+    it('should fail if organization is empty', async () => {
+      updateUser.organization = '';
+      updateUser.name = 'John Doe';
+      updateUser.email = 'valid@email.com';
+      const errors = await validate(updateUser);
+      expect(errors[0].constraints).toHaveProperty(
+        'isNotEmpty',
+        'Schule / Universität oder Organisation darf nicht leer sein',
+      );
+    });
+  });
+
+  describe('name', () => {
+    it('should fail if name is empty', async () => {
+      updateUser.organization = 'Example Organization';
+      updateUser.name = '';
+      updateUser.email = 'valid@email.com';
+      const errors = await validate(updateUser);
+      expect(errors[0].constraints).toHaveProperty(
+        'isNotEmpty',
+        'Name darf nicht leer sein',
+      );
+    });
+  });
+
+  describe('email', () => {
+    it('should fail if email is invalid', async () => {
+      updateUser.organization = 'Example Organization';
+      updateUser.name = 'John Doe';
+      updateUser.email = 'invalidEmail';
+      const errors = await validate(updateUser);
+      expect(errors[0].constraints).toHaveProperty(
+        'isEmail',
+        'E-Mail muss eine gültige E-Mail-Adresse sein',
+      );
+    });
+
+    it('should pass if email is valid', async () => {
+      updateUser.organization = 'Example Organization';
+      updateUser.name = 'John Doe';
+      updateUser.email = 'valid@email.com';
+      const errors = await validate(updateUser);
       expect(errors).toHaveLength(0);
     });
   });
