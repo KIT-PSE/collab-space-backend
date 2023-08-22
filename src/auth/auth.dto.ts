@@ -69,6 +69,26 @@ export class LoginUser {
   password: string;
 }
 
+export class UpdateUser {
+  @IsNotEmpty({
+    message: 'Schule / Universität oder Organisation darf nicht leer sein',
+  })
+  organization: string;
+
+  @IsNotEmpty({
+    message: 'Name darf nicht leer sein',
+  })
+  name: string;
+
+  @IsEmail(
+    {},
+    {
+      message: 'E-Mail muss eine gültige E-Mail-Adresse sein',
+    },
+  )
+  email: string;
+}
+
 /**
  * Data structure for changing user password.
  */

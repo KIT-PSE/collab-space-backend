@@ -58,17 +58,6 @@ export class UserController {
   }
 
   /**
-   * Update user data.
-   * Requires authentication.
-   * @param data - Object containing updated user data.
-   */
-  @UseGuards(AuthGuard)
-  @Put('changeUserData')
-  public async changeUserData(@Body() data: EditUser): Promise<boolean> {
-    return this.userService.changeUserData(data);
-  }
-
-  /**
    * Delete a user by ID.
    * Requires authentication and admin privilege.
    * @param userId - ID of the user to delete.

@@ -3,9 +3,8 @@ import { EntityManager } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/mysql';
 import { User } from './user.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { CreateUser } from '../auth/auth.dto';
+import { CreateUser, UpdateUser } from '../auth/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { EditUser } from './user.controller';
 
 /**
  * Service for user-related operations.
@@ -99,22 +98,35 @@ export class UserService {
   }
 
   /**
-   * Change user data.
-   * @param data - Updated user data.
-   * @returns A Promise that resolves to a boolean indicating success.
+   * Check if an email is already taken by another user.
+   *
+   * @param user - The user entity.
+   * @param email - The email to check.
    */
-  public async changeUserData(data: EditUser): Promise<boolean> {
-    const user = await this.findOne(data.id);
+  public async isEmailTakenNotBy(user: User, email: string): Promise<boolean> {
+    const foundUser = await this.repository.findOne({ email });
 
-    if (!user) {
-      throw new Error('User not found');
+    if (!foundUser) {
+      return false;
     }
 
+    return foundUser.id !== user.id;
+  }
+
+  /**
+   * Update user data.
+   *
+   * @param user - The user entity.
+   * @param data - Updated user data.
+   */
+  public async update(user: User, data: UpdateUser): Promise<User> {
     user.name = data.name;
     user.email = data.email;
     user.organization = data.organization;
+
     await this.em.persistAndFlush(user);
-    return true;
+
+    return user;
   }
 
   /**
