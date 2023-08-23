@@ -1,6 +1,5 @@
 import { User } from '../user.entity';
-import { EditUser } from '../user.controller';
-import { CreateUser } from '../../auth/auth.dto';
+import { CreateUser, UpdateUser } from '../../auth/auth.dto';
 
 export class MockUserService {
   constructor(private readonly testUser: User) {}
@@ -43,14 +42,26 @@ export class MockUserService {
     throw new Error('User not found');
   }
 
-  public async changeUserData(data: EditUser): Promise<boolean> {
-    if (data.id === 1) {
+  public async isEmailTakenNotBy(user: User, email: string): Promise<boolean> {
+    if (email === this.testUser.email) {
+      return Promise.resolve(false);
+    } else {
+      if (email.startsWith('istaken')) {
+        return Promise.resolve(true);
+      } else {
+        return Promise.resolve(false);
+      }
+    }
+  }
+
+  public async update(user: User, data: UpdateUser): Promise<User> {
+    if (user.id === 1) {
       this.testUser.name = data.name;
       this.testUser.email = data.email;
       this.testUser.organization = data.organization;
-      return Promise.resolve(true);
+      return Promise.resolve(this.testUser);
     }
-    throw new Error('User not found');
+    return Promise.resolve(user);
   }
 
   public async delete(id: number): Promise<number> {
