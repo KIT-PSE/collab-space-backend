@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { LoginUser, CreateUser, AuthPayload } from './auth.dto';
+import { LoginUser, CreateUser, AuthPayload, UpdateUser } from './auth.dto';
 import { User } from '../user/user.entity';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
@@ -47,11 +47,19 @@ export class AuthService {
    * @returns Authentication payload containing token, user, and expiration.
    */
   public async register(data: CreateUser): Promise<AuthPayload> {
-    // TODO: email verification
-
     const user = await this.users.create(data);
 
     return this.createToken(user);
+  }
+
+  /**
+   * Updates the authenticated user.
+   *
+   * @param data - Data for updating the user.
+   */
+  public async updateUser(data: UpdateUser): Promise<User> {
+    const user = await this.user();
+    return this.users.update(user, data);
   }
 
   /**

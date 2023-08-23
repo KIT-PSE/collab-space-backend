@@ -1,5 +1,5 @@
 import { User } from '../../user/user.entity';
-import { AuthPayload, CreateUser, LoginUser } from '../auth.dto';
+import { AuthPayload, CreateUser, LoginUser, UpdateUser } from '../auth.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtToken } from '../jwt.strategy';
@@ -37,6 +37,13 @@ export class MockAuthService {
         ...this.testUser,
         ...data,
       },
+    });
+  }
+
+  public async updateUser(data: UpdateUser): Promise<User> {
+    return Promise.resolve({
+      ...this.testUser,
+      ...data,
     });
   }
 

@@ -104,40 +104,6 @@ describe('UserController', () => {
     });
   });
 
-  describe('changeUserData', () => {
-    it('should change the data of the user', async () => {
-      const data = {
-        id: 1,
-        name: 'New Name',
-        email: 'newmail@example.com',
-        organization: 'New Organization',
-      };
-      const result = await controller.changeUserData(data);
-
-      expect(result).toBe(true);
-      expect(TEST_USER.name).toBe(data.name);
-      expect(TEST_USER.email).toBe(data.email);
-      expect(TEST_USER.organization).toBe(data.organization);
-    });
-
-    it('should throw an error if the user is not found', async () => {
-      const data = {
-        id: 2,
-        name: 'New Name',
-        email: 'newmail@example.com',
-        organization: 'New Organization',
-      };
-
-      await expect(controller.changeUserData(data)).rejects.toThrow(
-        'User not found',
-      );
-    });
-
-    it('should be protected with AuthGuard', () => {
-      expect(isGuarded(controller.changeUserData, AuthGuard)).toBe(true);
-    });
-  });
-
   describe('delete', () => {
     it('should delete the user', async () => {
       const result = await controller.delete(1);

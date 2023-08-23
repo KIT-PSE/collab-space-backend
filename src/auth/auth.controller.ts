@@ -8,18 +8,24 @@ import {
   Delete,
   Res,
   UseGuards,
+  UnprocessableEntityException,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { Response } from 'express';
-import { RegisterUser, LoginUser } from './auth.dto';
+import { RegisterUser, LoginUser, UpdateUser } from './auth.dto';
+import { UserService } from '../user/user.service';
 
 /**
  * Controller handling authentication-related operations.
  */
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly users: UserService,
+  ) {}
 
   /**
    * Registers a new user.
@@ -73,6 +79,20 @@ export class AuthController {
     const token = this.auth.token();
 
     return { user, exp: token.exp };
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('update')
+  public async update(@Body() data: UpdateUser) {
+    const user = await this.auth.user();
+
+    if (await this.users.isEmailTakenNotBy(user, data.email)) {
+      throw new UnprocessableEntityException([
+        ['email', 'Diese E-Mail-Adresse ist bereits vergeben.'],
+      ]);
+    }
+
+    return this.auth.updateUser(data);
   }
 
   /**

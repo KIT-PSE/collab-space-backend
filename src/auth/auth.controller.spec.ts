@@ -10,6 +10,8 @@ import { isGuarded } from '../../test/utils';
 import { AuthGuard } from './auth.guard';
 import { MockAuthService } from './mock/auth.service.mock';
 import { User } from '../user/user.entity';
+import { MockUserService } from '../user/mock/user.service.mock';
+import { UnprocessableEntityException } from '@nestjs/common';
 
 const TEST_USER = {
   id: 1,
@@ -41,6 +43,10 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: new MockAuthService(TEST_USER),
+        },
+        {
+          provide: UserService,
+          useValue: new MockUserService(TEST_USER),
         },
         {
           provide: JwtService,
@@ -112,6 +118,43 @@ describe('AuthController', () => {
 
     it('should be protected with AuthGuard', () => {
       expect(isGuarded(controller.profile, AuthGuard)).toBe(true);
+    });
+  });
+
+  describe('update', () => {
+    it('should update the authenticated user', async () => {
+      const updatedUser = {
+        name: 'New Test User',
+        organization: 'New Test Organization',
+        email: 'newemail@example.com',
+      };
+      const result = await controller.update(updatedUser);
+      expect(result).toEqual({ ...TEST_USER, ...updatedUser });
+    });
+
+    it('should throw an error if the email is taken', async () => {
+      const mockData = {
+        name: 'New Test User',
+        organization: 'New Test Organization',
+        email: 'istaken@example.com',
+      };
+      await expect(controller.update(mockData)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
+
+    it('should not throw an error if the user updates his own email', async () => {
+      const updatedUser = {
+        name: 'New Test User',
+        organization: 'New Test Organization',
+        email: 'test@example.com',
+      };
+      const result = await controller.update(updatedUser);
+      expect(result).toEqual({ ...TEST_USER, ...updatedUser });
+    });
+
+    it('should be protected with AuthGuard', () => {
+      expect(isGuarded(controller.update, AuthGuard)).toBe(true);
     });
   });
 
