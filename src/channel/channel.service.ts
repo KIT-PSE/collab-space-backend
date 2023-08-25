@@ -171,7 +171,7 @@ export class ChannelService {
     await this.rooms.updateWhiteboard(channel.room.id, channel.canvasJSON);
     await this.browsers.closeBrowserContext(channel.id);
 
-    await channel.close();
+    channel.close();
     delete this.channels[channel.id];
     this.logger.debug(`Closed ${channel}`);
   }

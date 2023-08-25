@@ -88,10 +88,6 @@ export class RoomService {
   public async delete(id: number, category: Category): Promise<number> {
     const room = await this.get(id, category);
 
-    if (!room) {
-      throw new Error('Room not found');
-    }
-
     this.eventEmitter.emit('room.deleted', room);
 
     return this.repository.nativeDelete({ id });

@@ -40,4 +40,18 @@ describe('User Entity', () => {
     expect(user.createdAt.getTime()).toBeLessThanOrEqual(currentDate.getTime());
     expect(user.updatedAt.getTime()).toBeLessThanOrEqual(currentDate.getTime());
   });
+
+  describe('toString', () => {
+    it('should return a string containing user ID and name', () => {
+      const user = new User(
+        'Test User',
+        'test@example.com',
+        'Test Org',
+        'password',
+      );
+      user.id = 1;
+
+      expect(user.toString()).toBe('User{1: "Test User"}');
+    });
+  });
 });
