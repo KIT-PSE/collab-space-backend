@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -116,6 +116,7 @@ export class ChannelService {
    * @param userId - The ID of the teacher user.
    * @returns The joined channel.
    * @throws WsException if the channel is not found or user is not found.
+   * @throws UnauthorizedException if the user is not the owner of the room.
    */
   public async joinAsTeacher(
     client: Socket,
@@ -132,6 +133,10 @@ export class ChannelService {
 
     if (!user) {
       throw new WsException('User not found');
+    }
+
+    if (channel.room.category.owner.id !== userId) {
+      throw new UnauthorizedException('User not authorized');
     }
 
     await channel.joinAsTeacher(client, user);
