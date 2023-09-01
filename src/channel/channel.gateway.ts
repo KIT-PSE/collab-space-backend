@@ -13,6 +13,7 @@ import { Channel } from './channel';
 import * as process from 'process';
 import * as dotenv from 'dotenv';
 import { BrowserService } from '../browser/browser.service';
+import { UnauthorizedException } from '@nestjs/common';
 
 dotenv.config();
 
@@ -117,16 +118,24 @@ export class ChannelGateway implements OnGatewayConnection {
     },
   ) {
     if (!this.channels.exists(payload.channelId)) {
-      return { error: 'Der Raum konnte nicht gefunden werden' };
+      return { error: 'Not found' };
     }
 
-    const channel = await this.channels.joinAsTeacher(
-      client,
-      payload.channelId,
-      payload.userId,
-    );
+    try {
+      const channel = await this.channels.joinAsTeacher(
+        client,
+        payload.channelId,
+        payload.userId,
+      );
 
-    return this.channelState(channel);
+      return this.channelState(channel);
+    } catch (e) {
+      if (e instanceof UnauthorizedException) {
+        return { error: 'Not authorized' };
+      }
+
+      throw e;
+    }
   }
 
   private channelState(channel: Channel) {
