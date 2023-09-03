@@ -19,6 +19,10 @@ export interface Student extends ChannelUser {
   permission: boolean;
 }
 
+export interface Settings {
+  globalMute: boolean;
+}
+
 /**
  * Represents a channel for a room in the application.
  */
@@ -29,6 +33,10 @@ export class Channel {
   public students: Map<string, Student> = new Map();
 
   public canvasJSON: string;
+
+  public settings: Settings = {
+    globalMute: false,
+  };
 
   /**
    * Creates a new Channel instance.
@@ -205,6 +213,14 @@ export class Channel {
     if (user) {
       user.video = video;
       user.audio = audio;
+    }
+  }
+
+  public disableAudioFor(studentId: string) {
+    const student = this.getStudent(studentId);
+
+    if (student) {
+      student.audio = false;
     }
   }
 

@@ -1,10 +1,4 @@
 async function START_RECORDING() {
-  console.log('start recording');
-
-  // const stream = await navigator.mediaDevices.getDisplayMedia({
-  //     preferCurrentTab: true,
-  // });
-
   const stream = await new Promise((resolve, reject) => {
     chrome.tabCapture.capture(
       {
@@ -31,19 +25,10 @@ async function START_RECORDING() {
   const promise = new Promise((resolve) => {
     const peer = new peerjs.Peer();
 
-    // peer.on('call', (call) => {
-    //     call.answer(stream);
-    // });
-
     peer.on('open', (id) => {
       resolve(id);
-      console.log('open peer:', id);
-
       peer.on('connection', (conn) => {
-        console.log('established connection:', conn);
-
         conn.on('open', () => {
-          console.log('connected: ' + conn.peer);
           conn.send('hello from the server');
           peer.call(conn.peer, stream);
         });
@@ -55,5 +40,5 @@ async function START_RECORDING() {
 }
 
 async function STOP_RECORDING() {
-  console.log('stop recording');
+  //
 }
