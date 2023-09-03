@@ -9,7 +9,7 @@ import {
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 import { Server, Socket } from 'socket.io';
 import { ChannelService } from './channel.service';
-import { Channel } from './channel';
+import { Channel, Settings } from './channel';
 import * as process from 'process';
 import * as dotenv from 'dotenv';
 import { BrowserService } from '../browser/browser.service';
@@ -167,6 +167,7 @@ export class ChannelGateway implements OnGatewayConnection {
         channelId: channel.id,
         whiteboardCanvas: channel.canvasJSON,
       },
+      settings: channel.settings,
       teacher,
       students,
     };
@@ -307,6 +308,41 @@ export class ChannelGateway implements OnGatewayConnection {
       id: payload.studentId,
       permission: payload.permission,
     });
+
+    return true;
+  }
+
+  /**
+   * Handle an 'update-settings' event to update channel settings.
+   *
+   * @param client The connected socket client.
+   * @param payload The payload containing settings.
+   * @returns A boolean indicating success.
+   */
+  @SubscribeMessage('update-settings')
+  @UseRequestContext()
+  public async updateSettings(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: Settings,
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.settings = payload;
+
+    this.server.to(channel.id).emit('update-settings', payload);
+
+    return true;
+  }
+
+  @SubscribeMessage('disable-audio-for')
+  @UseRequestContext()
+  public async disableAudioFor(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { userId: string },
+  ) {
+    const channel = await this.channels.fromClientOrFail(client);
+    channel.disableAudioFor(payload.userId);
+
+    this.server.to(channel.id).emit('disable-audio-for', payload.userId);
 
     return true;
   }
