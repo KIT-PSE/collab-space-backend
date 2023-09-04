@@ -74,6 +74,6 @@ export class CategoryController {
   public async delete(@Param('id') id: number) {
     const user = await this.auth.user();
     await this.categories.delete(id, user);
-    return 'OK';
+    return id;
   }
 }
