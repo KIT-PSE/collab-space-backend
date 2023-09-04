@@ -71,9 +71,9 @@ export class CategoryController {
    * @returns A message indicating the deletion status.
    */
   @Delete('/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   public async delete(@Param('id') id: number) {
     const user = await this.auth.user();
     await this.categories.delete(id, user);
+    return 'OK';
   }
 }
