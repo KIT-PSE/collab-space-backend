@@ -100,7 +100,7 @@ describe('category creation', () => {
     return request(bootstrap.app.getHttpServer())
       .delete('/category/1')
       .set('Cookie', [authCookie])
-      .expect(204);
+      .expect(200);
   });
 
   it('GET /category should be empty', async () => {
